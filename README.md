@@ -1,7 +1,7 @@
 # AWS Certified Solutions Architect – Professional (Recertification) Notes
 
 Endded 2025 on a positive note by recertifying as AWS Certified Solutions Architect – Professional 🎉  
-Sharing my structured preparation notes to support fellow architects in their journey.
+Sharing my structured preparation notes to support anyone preparing in their journey.
 
 ---
 
@@ -62,13 +62,15 @@ Most answers are about identifying the primary architectural driver.
 
 ---
 
-## 🤝 For Fellow Architects
+## 🤝 For Anyone Preparing
 
-If you’re preparing:
-- Don’t memorise services — understand patterns
-- Practice reading long questions calmly
-- Identify distractors quickly
-- Time management is critical
+If you're preparing for the AWS Certified Solutions Architect – Professional exam:
 
-Feel free to raise PRs or suggest improvements to these notes.
+- Focus on architectural trade-offs, not just services
+- Read long scenario questions calmly and identify the primary driver
+- Watch for distractors — there are usually two “almost correct” options
+- Think in terms of scale, resilience, governance, and cost
+- Practice time management — this exam is as much about focus as knowledge
+
+If this repository helps you in any way, feel free to use, adapt, or contribute.
 Happy learning!
