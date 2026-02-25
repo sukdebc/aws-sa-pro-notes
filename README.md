@@ -1,76 +1,104 @@
 # AWS Certified Solutions Architect – Professional (Recertification) Notes
 
-Endded 2025 on a positive note by recertifying as AWS Certified Solutions Architect – Professional 🎉  
-Sharing my structured preparation notes to support anyone preparing in their journey.
+![AWS Certified Solutions Architect – Professional](https://img.shields.io/badge/AWS-Certified%20Solutions%20Architect%20–%20Professional-232F3E?logo=amazonaws&logoColor=white)
+
+Recertified as **AWS Certified Solutions Architect – Professional** toward the end of 2025.
+
+These notes were organized primarily for structured revision and are shared here in case they are useful to colleagues or others preparing for the exam.
 
 ---
 
-## 🎯 Purpose of This Repo
+## About This Repository
 
 This repository contains:
-- Structured domain-wise notes
-- Architecture patterns and trade-offs
-- Service comparison summaries
-- Scenario-based thinking approaches
-- Exam preparation strategy
 
-This is NOT a brain dump or exam question repository.  
-All notes are conceptual and experience-based.
+- Condensed architectural reference notes  
+- Patterns and trade-off summaries  
+- Service comparison highlights  
+- Scenario-oriented observations  
+- Personal preparation reflections  
 
----
+Given this was a recertification, the material emphasizes reinforcing architectural decision patterns rather than documenting services comprehensively.
 
-## 🧠 How I Prepared
-
-- Focused on scenario-based architectural thinking
-- Deep dive into networking, hybrid connectivity, and multi-account strategy
-- Revisited disaster recovery patterns (RTO/RPO trade-offs)
-- Practiced elimination techniques for long scenario questions
-- Reviewed real-world architecture decisions and mapped them to AWS services
-- Practice mocks using whizlabs, tutordojo and go through explanations in details
+This is not a brain dump or a collection of exam questions.  
+The focus is on architectural reasoning, trade-offs, and system-level thinking.
 
 ---
 
-## 🏗 Key Areas to Focus On
+## Repository Structure
 
-- Complex multi-account architectures
-- Hybrid networking (Direct Connect, VPN, Transit Gateway)
-- Migration strategies (rehost, replatform, refactor)
-- Data consistency & resilience patterns
-- Cost optimisation at enterprise scale
-- Governance, IAM, SCP, Control Tower
+- `exam_domains_overview.md` – Official SAP-C02 blueprint summary and domain interpretation  
+- `notes/` – Thematic, condensed reference notes used during revision  
+
+While the official exam blueprint is documented separately, the notes themselves are organized based on architectural themes rather than strictly by domain.
 
 ---
 
-## 🧩 Useful Thinking Framework
+## Notes Index
 
-When solving questions, ask:
+### Architecture Foundations
+- [Networking](notes/01-networking.md)
+- [IAM](notes/02-iam.md)
+- [Governance & Organizations](notes/03-governance.md)
+- [Security Services](notes/09-security.md)
 
-1. Is this a resilience problem?
-2. Is this a consistency vs availability trade-off?
-3. Is this cost optimisation vs performance?
-4. Is governance or security the hidden requirement?
+### Compute & Application Layers
+- [Compute & Auto Scaling](notes/08-compute.md)
+- [Serverless](notes/10-serverless.md)
+- [Containers](notes/13-containers.md)
+- [Application Integration](notes/11-integration.md)
 
-Most answers are about identifying the primary architectural driver.
+### Data & Storage
+- [Storage](notes/05-storage.md)
+- [Database](notes/06-database.md)
+- [Analytics](notes/12-analytics.md)
+
+### Reliability & Global Design
+- [Resilience Patterns](notes/07-resiliency.md)
+- [Disaster Recovery](notes/04-dr.md)
+- [Edge & Global Services](notes/15-edge.md)
+
+### Migration & Modernization
+- [Migration Strategies](notes/14-migration.md)
+
+For a blueprint-aligned view of how these topics map to exam domains:
+
+👉 **[Exam Domains Overview](exam_domains_overview.md)**
 
 ---
 
-## 📚 Recommended Resources
+## Preparation Approach
 
-- AWS Whitepapers (Well-Architected Framework)
-- Service FAQs (especially networking & data services)
-- Mock from whizlabs, tutordojo
+For this recertification, the emphasis was on reinforcing architectural depth rather than memorizing individual service features.
+
+Areas revisited more thoroughly included:
+
+- Networking and hybrid connectivity  
+- Multi-account design patterns  
+- Disaster recovery strategies (RTO/RPO alignment)  
+- Governance models (IAM, SCPs, Organizations)  
+- Data consistency and resilience patterns  
+
+Practice exams (Whizlabs and Tutorials Dojo) were useful primarily for reviewing explanation logic and refining decision-making under constraints.
 
 ---
 
-## 🤝 For Anyone Preparing
+## Use of AI Tools
 
-If you're preparing for the AWS Certified Solutions Architect – Professional exam:
+AI tools were used to help structure and refine portions of the material efficiently.
 
-- Focus on architectural trade-offs, not just services
-- Read long scenario questions calmly and identify the primary driver
-- Watch for distractors — there are usually two “almost correct” options
-- Think in terms of scale, resilience, governance, and cost
-- Practice time management — this exam is as much about focus as knowledge
+The content has been reviewed and adjusted to the best of my understanding and practical experience.
 
-If this repository helps you in any way, feel free to use, adapt, or contribute.
-Happy learning!
+---
+
+If the material is helpful, feel free to use or adapt it.
+
+---
+
+## Disclaimer
+
+These notes reflect personal preparation and learning experience.  
+They are not affiliated with or endorsed by AWS or any mock exam providers.
+
+No exam questions or confidential content are included.  
+All material is conceptual and intended for study and reference purposes only.
