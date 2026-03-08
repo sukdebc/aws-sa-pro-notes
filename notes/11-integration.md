@@ -8,14 +8,20 @@ The focus is on understanding workload characteristics, delivery guarantees, and
 
 ---
 
-# 1️⃣ SNS, SQS, and EventBridge – Architectural Roles
+# SNS, SQS, and EventBridge – Architectural Roles
 
-📘 AWS Docs:
-- SNS: https://docs.aws.amazon.com/sns/latest/dg/welcome.html
-- SQS: https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html
-- EventBridge: https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html
+Documentation
 
-Although often grouped together, these services serve fundamentally different architectural purposes.
+SNS  
+https://docs.aws.amazon.com/sns/latest/dg/welcome.html
+
+SQS  
+https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html
+
+EventBridge  
+https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html
+
+Although often grouped together, these services serve different architectural purposes.
 
 ---
 
@@ -23,16 +29,19 @@ Although often grouped together, these services serve fundamentally different ar
 
 SNS follows a publish/subscribe model and pushes messages to multiple subscribers.
 
-### Key Characteristics
+Key characteristics:
 
 - Push-based delivery
 - Multiple subscriber support
-- Targets: SQS, Lambda, HTTP/S, SMS, Email
+- Targets include SQS, Lambda, HTTP/S endpoints, SMS, and email
 - No strict ordering guarantee
-- No durable message storage unless combined with SQS
+- No durable storage unless combined with SQS
 - Supports message filtering policies
 
-SNS aligns with broadcast-style communication where multiple downstream systems must react to the same event.
+SNS aligns with broadcast-style communication where multiple downstream systems react to the same event.
+
+> **EXAM TIP**  
+> Broadcast events to multiple services → SNS.
 
 ---
 
@@ -40,175 +49,198 @@ SNS aligns with broadcast-style communication where multiple downstream systems 
 
 SQS introduces asynchronous decoupling between producers and consumers.
 
-### Key Characteristics
+Key characteristics:
 
 - Pull-based processing
 - At-least-once delivery
-- Configurable retention (1 minute to 14 days)
+- Configurable retention from 1 minute to 14 days
 - Visibility timeout controls retry behavior
-- Native Dead Letter Queue (DLQ) support
+- Native Dead Letter Queue support
 - Standard and FIFO variants
 
-SQS is typically used to:
+SQS is commonly used to:
 
 - Smooth traffic spikes
-- Protect downstream systems
+- Protect downstream services
 - Isolate failure domains
 - Enable asynchronous retries
+
+> **EXAM TIP**  
+> Protect downstream systems from burst traffic → SQS.
 
 ---
 
 ## EventBridge – Event Routing and Governance
 
-EventBridge acts as an event bus with advanced filtering and routing capabilities.
+EventBridge acts as an event bus with advanced routing capabilities.
 
-### Key Characteristics
+Key characteristics:
 
 - JSON pattern-based filtering
-- Case-sensitive matching
+- Case-sensitive event matching
 - Cross-account event routing
 - Archive and replay capability
 - Schema registry
 - EventBridge Pipes for direct source-to-target integration
 - Native SaaS integrations
 
-EventBridge aligns with event-driven architectures that require content-based routing and governance.
+EventBridge aligns with event-driven architectures requiring content-based routing and event governance.
+
+> **EXAM TIP**  
+> Content-based routing or SaaS integrations → EventBridge.
 
 ---
 
-# 2️⃣ SQS Standard vs FIFO
+# SQS Standard vs FIFO
 
-📘 AWS Docs:
-- FIFO Queues: https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html
+Documentation  
+https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html
 
 | Feature | Standard | FIFO |
-|----------|----------|------|
+|--------|----------|------|
 | Ordering | Best effort | Strict ordering |
-| Throughput | Virtually unlimited | 300 msg/sec per message group (higher with batching) |
+| Throughput | Virtually unlimited | Limited per message group |
 | Duplicate Messages | Possible | Exactly-once processing |
 | Message Groups | Not required | Required for scaling |
-| Use Case | High scale, eventual consistency | Financial, ordered workflows |
+| Use Case | High scale workloads | Ordered workflows |
 
-FIFO queues are relevant when strict ordering or exactly-once semantics are correctness requirements.
+FIFO queues are used when ordering or exactly-once processing is required.
 
-Standard queues align with high-throughput workloads where occasional duplication is acceptable.
+Standard queues support very high throughput where occasional duplication is acceptable.
 
 ---
 
-# 3️⃣ Lambda + SQS Integration
+# Lambda and SQS Integration
 
-📘 AWS Docs:
-- https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html
+Documentation  
+https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html
 
 Lambda integrates with SQS using a polling model.
 
-### Key Parameters
+Key parameters include:
 
 - Batch size
 - Maximum batching window
 - Visibility timeout
 - Reserved concurrency
 
-### Failure Handling Pattern
+Failure handling behavior:
 
-- If processing fails, the message becomes visible again.
-- After exceeding the max receive count, the message is sent to a DLQ.
-- Partial batch responses allow fine-grained failure handling.
+- Failed messages become visible again
+- Messages exceeding max receive count move to DLQ
+- Partial batch responses enable granular retry behavior
 
-Visibility timeout must exceed maximum Lambda processing time to avoid duplicate processing.
+Visibility timeout must exceed the maximum Lambda processing time to prevent duplicate processing.
+
+> **EXAM TIP**  
+> Visibility timeout must be greater than Lambda runtime.
 
 ---
 
-# 4️⃣ Step Functions
+# Step Functions
 
-📘 AWS Docs:
-- https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html
-- https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html
+Documentation  
+https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html  
+https://docs.aws.amazon.com/step-functions/latest/dg/concepts-error-handling.html
 
-Step Functions provide state-machine-based workflow orchestration.
+Step Functions orchestrate distributed workflows using state machines.
 
-### Typical Use Cases
+Typical use cases include:
 
 - Multi-step business workflows
 - Long-running processes
-- Parallel processing (Map state)
-- Distributed transactions (Saga pattern)
+- Parallel execution
+- Distributed transaction patterns
 - Centralized retry and error handling
 
-### Core Capabilities
+Core capabilities:
 
 - Retry and Catch policies
-- Parallel execution
-- Service integrations (200+ AWS integrations)
+- Parallel states
+- Map state for distributed processing
 - Human approval workflows
-- Express and Standard workflows
+- Integration with many AWS services
 
-Step Functions are typically preferred over custom orchestration logic inside Lambda.
+Step Functions are preferred over embedding orchestration logic inside Lambda functions.
+
+> **EXAM TIP**  
+> Multi-step orchestration or complex retries → Step Functions.
 
 ---
 
-# 5️⃣ API Gateway
+# API Gateway
 
-📘 AWS Docs:
-- https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html
+Documentation  
+https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html
 
-API Gateway provides managed API front-door capability.
+API Gateway provides a managed API front door for services.
 
-### Key Characteristics
+Key characteristics:
 
-- REST, HTTP, and WebSocket APIs
-- Throttling and rate limiting
+- Supports REST, HTTP, and WebSocket APIs
+- Built-in throttling and rate limiting
 - Request validation
-- IAM, Cognito, Lambda authorizers
-- Direct integrations with AWS services
-- Caching support
+- Authentication through IAM, Cognito, or Lambda authorizers
+- Direct integration with AWS services
+- Optional caching
 - WAF integration
 
-API Gateway is often used in conjunction with Lambda, SQS, or Step Functions to build event-driven or serverless architectures.
+API Gateway is commonly used with Lambda, Step Functions, or SQS in serverless architectures.
 
 ---
 
-# 6️⃣ SNS vs SQS vs EventBridge – Comparison
-
-## High-Level Comparison
+# SNS vs SQS vs EventBridge
 
 | Feature | SNS | SQS | EventBridge |
-|----------|------|------|-------------|
-| Communication Model | Push | Pull | Push (Event Bus) |
-| Primary Role | Broadcast | Buffering | Event Routing |
-| Message Retention | No durable storage | 1 min – 14 days | 24 hours (default) |
-| Ordering | No | FIFO supports strict ordering | No |
-| Replay | No | No native replay | Archive + Replay |
+|--------|------|------|-------------|
+| Communication Model | Push | Pull | Push |
+| Primary Role | Broadcast | Buffering | Event routing |
+| Message Retention | No durable storage | 1 minute to 14 days | 24 hours default |
+| Ordering | No | FIFO supported | No |
+| Replay | No | No native replay | Archive and replay |
 | Filtering | Subscription filtering | None | Advanced JSON filtering |
-| Cross-Account | Limited | Yes (permissions-based) | Native support |
+| Cross Account | Limited | Yes | Native support |
 | DLQ Support | Via SQS | Native | Native |
 
 ---
 
-# 7️⃣ When to Combine Services
+# Service Combination Patterns
 
-Common integration patterns include:
+Common integration architectures combine services together.
 
-- SNS → SQS for fan-out + durability
-- EventBridge → Lambda for event-driven workflows
-- SQS → Lambda for backpressure control
-- API Gateway → SQS for asynchronous ingestion
-- EventBridge → Step Functions for orchestrated workflows
-- SNS → multiple SQS queues for microservice decoupling
+Typical patterns include:
 
-These services are often complementary rather than mutually exclusive.
+SNS → SQS  
+Fan-out with durable message buffering.
+
+EventBridge → Lambda  
+Event-driven microservices.
+
+SQS → Lambda  
+Backpressure control and asynchronous processing.
+
+API Gateway → SQS  
+Asynchronous ingestion pattern.
+
+EventBridge → Step Functions  
+Event-driven workflow orchestration.
+
+SNS → Multiple SQS Queues  
+Microservice fan-out pattern.
+
+Integration services are often complementary rather than mutually exclusive.
 
 ---
 
-# 8️⃣ Decision Heuristics
+# Decision Heuristics
 
-Architectural signals that clarify service selection:
+Architectural signals that guide service selection:
 
 - Workload smoothing → SQS
-- Broadcast to multiple subscribers → SNS
+- Broadcast events → SNS
 - Content-based routing → EventBridge
 - Strict ordering → SQS FIFO
-- Replay requirement → EventBridge Archive
+- Event replay requirement → EventBridge Archive
 - Multi-step orchestration → Step Functions
 - Public API exposure → API Gateway
 
@@ -216,24 +248,29 @@ The distinction is usually about delivery semantics rather than throughput.
 
 ---
 
-# Common Pitfalls in Integration Scenarios
+# Common Pitfalls
 
-- Confusing broadcast (SNS) with buffering (SQS).
-- Selecting EventBridge when strict ordering is required.
-- Using SQS when multiple subscribers must independently receive the same event.
-- Overlooking visibility timeout configuration in Lambda + SQS.
-- Treating Lambda as a workflow orchestrator instead of using Step Functions.
-- Ignoring DLQ configuration in reliability-sensitive systems.
-- Forgetting that EventBridge filtering is case-sensitive.
-- Assuming API Gateway provides automatic retry of downstream failures.
+- Confusing broadcast messaging with buffering  
+- Selecting EventBridge when strict ordering is required  
+- Using SQS when multiple subscribers must receive the same event independently  
+- Misconfiguring visibility timeout for Lambda processing  
+- Using Lambda as a workflow orchestrator instead of Step Functions  
+- Forgetting to configure Dead Letter Queues  
+- Overlooking EventBridge case-sensitive filtering  
+- Assuming API Gateway retries downstream failures automatically  
 
-Most integration decisions become clearer when reframed around:
+---
 
-- Delivery semantics (push vs pull)
+# Design Considerations
+
+Integration architecture decisions typically depend on:
+
+- Delivery model (push vs pull)
 - Ordering guarantees
-- Replay requirements
+- Replay and auditing requirements
 - Routing complexity
-- Failure isolation
+- Failure isolation boundaries
 - Consumer scaling model
+- Event durability requirements
 
-Understanding these dimensions typically clarifies the appropriate architectural direction.
+Clear architectural choices emerge by understanding delivery semantics and failure handling behavior across integration services.

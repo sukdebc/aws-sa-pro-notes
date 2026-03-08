@@ -12,359 +12,429 @@ These notes summarize AWS serverless building blocks with focus on:
 - Orchestration trade-offs
 - Cost predictability
 
-Serverless architecture succeeds or fails at integration boundaries — not compute.
+Serverless architecture succeeds or fails at integration boundaries rather than compute capacity.
 
 ---
 
-# 1️⃣ AWS Lambda
+# AWS Lambda
 
-📘 Docs: https://docs.aws.amazon.com/lambda/
+Documentation  
+https://docs.aws.amazon.com/lambda/
 
-Lambda is regional, multi-AZ, and event-driven.
+Lambda is a regional, multi-AZ, event-driven compute service.
 
-It scales based on incoming events and concurrency.
+It scales automatically based on incoming events and concurrency demand.
+
+Execution environments are ephemeral and stateless.
 
 ---
 
-## 1.1 Concurrency & Scaling
+## Concurrency and Scaling
 
-### Default Concurrency
+Lambda scaling is controlled through concurrency.
+
+Default concurrency:
 
 - Regional soft limit
-- Burst scaling supported
 - Shared across all functions
+- Supports burst scaling
 
-Scaling is per invocation, not per instance.
+Scaling is based on invocation demand rather than instance capacity.
 
 ---
 
 ### Reserved Concurrency
 
-- Guarantees execution capacity
-- Enforces hard throttle limit
-- Protects downstream systems
-- Isolates workloads
+Reserved concurrency:
 
-Use when:
+- Guarantees execution capacity
+- Enforces a maximum execution limit
+- Protects downstream dependencies
+- Prevents noisy neighbor effects
+
+Used when:
+
 - Protecting databases
-- Preventing noisy neighbor effects
-- Enforcing rate control
+- Controlling rate of execution
+- Isolating critical workloads
 
 ---
 
 ### Provisioned Concurrency
 
-- Pre-initialized execution environments
+Provisioned concurrency keeps execution environments pre-initialized.
+
+Benefits:
+
 - Reduces cold start latency
-- Applied to versions/aliases
+- Provides predictable performance
+- Applied to Lambda versions or aliases
 
-Use when:
-- Low latency is critical
-- Synchronous APIs must be predictable
+Trade-off:
 
-Trade-off: Increased cost.
+- Additional cost due to pre-provisioned capacity
+
+> **EXAM TIP**  
+> Low latency synchronous APIs with Lambda → Provisioned Concurrency.
 
 ---
 
-## 1.2 Lambda Scaling Boundaries (High-Yield)
+## Lambda Scaling Boundaries
 
-| Trigger Type | Scaling Behavior |
-|--------------|------------------|
+| Trigger Source | Scaling Behavior |
+|----------------|------------------|
 | API Gateway | Scales with request rate |
-| SQS | Scales with queue depth |
+| SQS | Scales based on queue depth |
 | Kinesis | Scales per shard |
 | DynamoDB Streams | Scales per shard |
-| SNS | Push-based |
-| EventBridge | Push-based |
+| SNS | Push-based invocation |
+| EventBridge | Push-based invocation |
 
-Important: Kinesis & DynamoDB Streams preserve ordering per shard.
+Kinesis and DynamoDB Streams preserve ordering within each shard.
 
----
-
-## 1.3 Idempotency (Often Tested)
-
-Because Lambda is at-least-once for async and stream triggers:
-
-- Implement idempotency keys
-- Use DynamoDB conditional writes
-- Track processed message IDs
-
-Exactly-once processing is application-level responsibility.
+> **EXAM TIP**  
+> Stream processing scale is limited by shard count.
 
 ---
 
-## 1.4 Lambda in a VPC
+## Idempotency
 
-📘 Docs: https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html
+Lambda invocation models often provide at-least-once delivery.
 
-When inside VPC:
+Applications must implement idempotency to avoid duplicate processing.
 
-- ENIs created per subnet
-- Subnet IP exhaustion limits scaling
-- Cold starts increase slightly
+Typical techniques:
 
-Private subnet requires:
+- Idempotency keys
+- DynamoDB conditional writes
+- Tracking processed message IDs
 
-- NAT for internet access
-- VPC Endpoints for AWS services
+Exactly-once processing is implemented at the application level.
 
-📘 PrivateLink: https://docs.aws.amazon.com/vpc/latest/privatelink/
+---
 
-Common endpoints:
+## Lambda in a VPC
+
+Documentation  
+https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html
+
+When Lambda runs inside a VPC:
+
+- Elastic Network Interfaces are created
+- Subnet IP capacity can limit scaling
+- Cold start latency may increase slightly
+
+Private subnet configurations require:
+
+- NAT Gateway for internet access
+- VPC endpoints for AWS service access
+
+Documentation  
+https://docs.aws.amazon.com/vpc/latest/privatelink/
+
+Common endpoints include:
+
 - SQS
 - KMS
 - Secrets Manager
-- SSM
+- Systems Manager
 - DynamoDB
 
 ---
 
-## 1.5 Retry Model
+## Lambda Retry Model
 
-📘 Docs: https://docs.aws.amazon.com/lambda/latest/dg/invocation-retries.html
+Documentation  
+https://docs.aws.amazon.com/lambda/latest/dg/invocation-retries.html
 
-### Synchronous
-- No retry
-- Caller responsible
+Synchronous invocation:
 
-### Asynchronous
-- 2 automatic retries
-- DLQ or failure destinations supported
+- No automatic retry
+- Caller handles failures
 
-### Streams
-- Retries until record expires
-- Failed record can block shard
+Asynchronous invocation:
 
-Use partial batch response for stream sources.
+- Two automatic retries
+- Supports Dead Letter Queues
+- Supports failure destinations
 
----
+Stream-based invocation:
 
-## 1.6 Limits
+- Retries until record expiration
+- Failed record may block shard progress
 
-- Max memory: 10 GB
-- /tmp storage: 10 GB
-- Max execution time: 15 minutes
-
-Memory increases CPU proportionally.
+Partial batch response can reduce retry amplification.
 
 ---
 
-# 2️⃣ Messaging & Event Routing
+## Lambda Limits
+
+- Maximum execution time: 15 minutes
+- Maximum memory: 10 GB
+- Temporary storage (/tmp): 10 GB
+
+Memory allocation scales CPU proportionally.
 
 ---
 
-## 2.1 Amazon SQS
+# Messaging and Event Routing
 
-📘 Docs: https://docs.aws.amazon.com/sqs/
+Serverless architectures rely heavily on messaging services for decoupling and buffering.
 
-### Standard
-- At-least-once
-- Unlimited throughput
+---
+
+## Amazon SQS
+
+Documentation  
+https://docs.aws.amazon.com/sqs/
+
+SQS provides durable message buffering.
+
+Standard queue characteristics:
+
+- At-least-once delivery
 - Best-effort ordering
+- Virtually unlimited throughput
 
-### FIFO
-- Exactly-once
-- Ordered per message group
+FIFO queue characteristics:
+
+- Exactly-once processing
+- Ordered processing within message group
 - Throughput limited per group
 
-Use FIFO only when strict ordering required.
+> **EXAM TIP**  
+> Use FIFO only when strict ordering is required.
 
 ---
 
-## 2.2 Amazon SNS
+## Amazon SNS
 
-📘 Docs: https://docs.aws.amazon.com/sns/
+Documentation  
+https://docs.aws.amazon.com/sns/
 
-- Push-based fan-out
-- Broadcast pattern
-- No durable storage unless paired with SQS
+SNS provides push-based event fan-out.
 
-Best for event distribution to multiple subscribers.
+Common characteristics:
+
+- Pub/sub messaging model
+- Multiple subscribers
+- Immediate delivery
+
+SNS does not provide message persistence unless combined with SQS.
+
+Typical usage includes broadcast event distribution.
 
 ---
 
-## 2.3 Amazon EventBridge
+## Amazon EventBridge
 
-📘 Docs: https://docs.aws.amazon.com/eventbridge/
+Documentation  
+https://docs.aws.amazon.com/eventbridge/
 
-- Advanced JSON filtering
-- Archive + Replay
-- Cross-account routing
+EventBridge provides event routing with advanced filtering.
+
+Capabilities include:
+
+- JSON event pattern filtering
+- Cross-account event routing
+- Archive and replay
 - SaaS integrations
-- Scheduled events
+- Scheduled event rules
 
-Best for rule-based routing.
+EventBridge is commonly used for event-driven integration patterns.
 
 ---
 
-## SNS vs EventBridge vs SQS
+## Messaging Service Comparison
 
 | Feature | SNS | EventBridge | SQS |
-|----------|------|-------------|------|
-| Delivery | Push | Push | Poll |
-| Filtering | Basic | Advanced | None |
-| Replay | No | Yes | No |
+|--------|------|-------------|------|
+| Delivery Model | Push | Push | Poll |
+| Filtering | Basic | Advanced JSON rules | None |
+| Replay Support | No | Yes | No |
 | Ordering | No | No | FIFO only |
 | Buffering | No | No | Yes |
 
 ---
 
-# 3️⃣ Step Functions
+# Step Functions
 
-📘 Docs: https://docs.aws.amazon.com/step-functions/
+Documentation  
+https://docs.aws.amazon.com/step-functions/
 
-Orchestrates distributed workflows.
+Step Functions orchestrates distributed workflows across AWS services.
+
+It coordinates tasks, retries, branching logic, and failure handling.
 
 ---
 
-## Standard vs Express
+## Standard vs Express Workflows
 
 | Feature | Standard | Express |
-|----------|-----------|----------|
-| Max Duration | 1 year | 5 minutes |
+|--------|----------|---------|
+| Max Duration | Up to 1 year | Up to 5 minutes |
 | Execution Model | Exactly-once | At-least-once |
-| Pricing | Per state | Per duration |
+| Pricing Model | Per state transition | Duration and request based |
 | Throughput | Moderate | Very high |
 
-Standard = durable workflows  
-Express = high-volume event pipelines  
+Standard workflows are used for durable, long-running orchestration.
+
+Express workflows are optimized for high-volume event processing.
 
 ---
 
-## When to Use Step Functions Instead of Lambda
+## When to Use Step Functions
 
-- Multi-step workflows
-- Human approval steps
+Step Functions are suitable when workflows require:
+
+- Multi-step orchestration
 - Complex retry logic
-- Saga pattern compensation
+- Long-running processes
+- Human approval steps
+- Compensation workflows
 
-Avoid writing orchestration logic inside Lambda.
+Lambda should not contain orchestration logic.
+
+> **EXAM TIP**  
+> Complex workflow orchestration → Step Functions.
 
 ---
 
-# 4️⃣ API Gateway
+# API Gateway
 
-📘 Docs: https://docs.aws.amazon.com/apigateway/
+Documentation  
+https://docs.aws.amazon.com/apigateway/
+
+API Gateway provides managed API front-end capabilities for serverless systems.
 
 ---
 
-## API Types
+## API Gateway Types
 
 | Type | Characteristics |
-|------|----------------|
-| REST API | Full features |
-| HTTP API | Lower cost |
-| WebSocket | Real-time |
+|-----|----------------|
+| REST API | Full feature set |
+| HTTP API | Lower cost, simpler features |
+| WebSocket API | Real-time communication |
 
-Choose HTTP API unless:
-- API keys needed
-- Caching required
-- Advanced usage plans required
+HTTP APIs are typically preferred unless advanced features are required.
 
 ---
 
-## API Gateway vs ALB for Lambda
+## API Gateway vs Application Load Balancer for Lambda
 
 | Feature | API Gateway | ALB |
-|----------|--------------|-----|
-| Native serverless | Yes | Partial |
+|--------|-------------|-----|
+| Native serverless integration | Yes | Partial |
 | Cost | Higher | Lower |
-| Auth integrations | Strong | Limited |
-| WebSocket | Yes | No |
+| Authentication integrations | Strong | Limited |
+| WebSocket support | Yes | No |
 
-Use ALB for simpler internal workloads.
+ALB is often used for simpler internal workloads.
 
 ---
 
-# 5️⃣ Backpressure & Protection Patterns
+# Backpressure and Protection Patterns
+
+Serverless systems must control downstream load.
 
 ---
 
 ## Queue Buffering Pattern
 
+Architecture pattern:
+
 API → Lambda → SQS → Worker Lambda
 
-Benefits:
-- Smooths spikes
-- Protects DB
-- Enables retry control
+Benefits include:
+
+- Smoothing traffic spikes
+- Protecting downstream systems
+- Enabling controlled retry behavior
 
 ---
 
 ## Fan-Out Pattern
 
+Architecture pattern:
+
 SNS → SQS → Lambda
 
-Prevents slow consumer blocking others.
+Advantages include:
+
+- Independent consumer scaling
+- Isolation of slow consumers
+- Improved fault tolerance
 
 ---
 
-## Circuit Breaker
+## Circuit Breaker Pattern
 
-Use:
+Typical techniques include:
+
 - Reserved concurrency
-- SQS buffer
-- Step Functions retry
-- Timeout + fallback
+- Queue buffering
+- Step Functions retries
+- Timeout and fallback logic
 
-Prevents cascading failures.
+This prevents cascading failures across services.
 
 ---
 
-# 6️⃣ Lambda vs Fargate (Common Exam Trap)
+# Lambda vs Fargate
 
 | Feature | Lambda | Fargate |
-|----------|--------|---------|
-| Max runtime | 15 min | No hard limit |
-| Scaling | Event-driven | Task-based |
-| Cold start | Yes | No |
-| Best for | Event-driven | Long-running workloads |
-| Stateful | No | Yes (with storage) |
+|--------|--------|---------|
+| Maximum runtime | 15 minutes | No hard limit |
+| Scaling model | Event-driven | Task-based |
+| Cold start | Possible | None |
+| Best suited for | Event-driven workloads | Long-running containers |
+| Stateful processing | No | Possible with storage |
 
-Choose Fargate when:
-- Long-running jobs
-- Custom networking required
-- Containers needed
+Fargate is preferred when workloads are long-running or container-based.
 
 ---
 
-# 7️⃣ Large File Upload Pattern
+# Large File Upload Pattern
 
-📘 Docs: https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html
+Documentation  
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html
 
-Correct pattern:
+Recommended architecture:
 
-1. API returns pre-signed URL
-2. Client uploads directly to S3
-3. S3 triggers Lambda
+- API returns pre-signed URL
+- Client uploads directly to S3
+- S3 event triggers Lambda processing
 
-Never proxy large files through Lambda.
+Large files should not be proxied through Lambda.
 
----
-
-# 8️⃣ Common Pitfalls
-
-- Lambda in private subnet without NAT/endpoints
-- Ignoring shard-based scaling limits
-- Using FIFO unnecessarily
-- Not implementing idempotency
-- Blocking streams with bad records
-- Using REST API when HTTP API sufficient
-- Overlooking reserved concurrency
-- Treating Express Step Functions as durable
+> **EXAM TIP**  
+> Large file upload → Pre-signed S3 URL pattern.
 
 ---
 
-# 9️⃣ Architectural Decision Lens
+# Common Pitfalls
 
-Before choosing:
+- Deploying Lambda in private subnet without NAT or endpoints  
+- Ignoring shard-based scaling limits for streams  
+- Using FIFO queues unnecessarily  
+- Not implementing idempotency for duplicate events  
+- Blocking stream processing due to failed records  
+- Choosing REST API when HTTP API is sufficient  
+- Forgetting reserved concurrency protections  
+- Using Express Step Functions for durable workflows  
 
-- Is ordering required?
-- Is buffering required?
-- Is replay required?
-- Is latency critical?
-- Is workflow multi-step?
-- Is load predictable?
-- Is downstream fragile?
+---
 
-Serverless architecture clarity comes from understanding scaling boundary and failure model first.
+# Design Considerations
+
+Serverless architecture decisions typically align with:
+
+- Whether buffering or decoupling is required  
+- Whether ordering guarantees are needed  
+- Whether replay or event auditing is necessary  
+- Whether latency requirements require provisioned concurrency  
+- Whether workflows are simple events or complex orchestration  
+- Whether downstream services require protection from bursts  
+
+Clear serverless architectures emerge by first understanding scaling boundaries, event flow patterns, and failure handling strategies.

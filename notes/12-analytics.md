@@ -2,357 +2,446 @@
 
 Kinesis • MSK • Glue • EMR • Athena • Redshift • Lake Formation • OpenSearch
 
-These notes summarize streaming, batch, data lake, and warehouse architectures, focusing on scaling models, governance integration, replay behavior, and workload separation patterns.
+These notes summarize streaming, batch analytics, data lake architectures, and warehouse workloads across AWS analytics services.
+
+The focus is on scaling models, replay behavior, governance integration, and workload separation across ingestion, processing, storage, and query layers.
 
 ---
 
-## Streaming Ingestion
+# Streaming Ingestion
 
-### Kinesis Data Streams (KDS)
+## Kinesis Data Streams
 
-**AWS Documentation:**  
-https://docs.aws.amazon.com/streams/latest/dev/introduction.html  
+Documentation  
+https://docs.aws.amazon.com/streams/latest/dev/introduction.html
 
-Used for high-throughput real-time ingestion.
+Kinesis Data Streams supports high-throughput real-time ingestion.
 
-### Core Concepts
+Core characteristics:
 
-- Shard-based scaling  
-- 1 MB/sec ingress per shard  
-- 2 MB/sec egress per shard  
-- 1,000 records/sec write per shard  
-- Replay supported via TRIM_HORIZON / AT_TIMESTAMP  
-- Enhanced Fan-Out provides dedicated 2 MB/sec per consumer  
+- Shard-based scaling
+- 1 MB/sec ingress per shard
+- 2 MB/sec egress per shard
+- 1,000 records/sec writes per shard
+- Data replay supported
+- Ordered processing within a shard
 
-**Enhanced Fan-Out Docs:**  
-https://docs.aws.amazon.com/streams/latest/dev/enhanced-consumers.html  
+Replay can be performed using:
+
+- TRIM_HORIZON
+- AT_TIMESTAMP
+
+Enhanced fan-out provides dedicated throughput for each consumer.
+
+Documentation  
+https://docs.aws.amazon.com/streams/latest/dev/enhanced-consumers.html
+
+Enhanced fan-out characteristics:
+
+- Dedicated 2 MB/sec per consumer
+- Lower consumer latency
+- Reduced read contention
 
 ---
 
-### Partition Key Design
+## Partition Key Design
 
 Partition key determines shard placement.
 
-Poor key distribution causes:
+Poor partition key design may cause:
 
-- Hot shards  
-- Consumer lag  
-- Uneven scaling  
+- Hot shards
+- Consumer lag
+- Uneven scaling
 
-Scaling approaches:
+Scaling approaches include:
 
-- Increase shard count  
-- Redesign partition key  
-- Use On-Demand mode for unpredictable workloads  
+- Increasing shard count
+- Redesigning partition key
+- Using on-demand capacity mode
 
-**On-Demand Mode Docs:**  
-https://docs.aws.amazon.com/streams/latest/dev/how-do-i-scale.html  
+Documentation  
+https://docs.aws.amazon.com/streams/latest/dev/how-do-i-scale.html
 
----
-
-### Kinesis Data Firehose
-
-**AWS Documentation:**  
-https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html  
-
-Managed streaming delivery service.
-
-- No shard management  
-- Delivers to S3, Redshift, OpenSearch, HTTP endpoints  
-- Supports Lambda transformation  
-- Near real-time delivery  
-- No replay capability  
-
-Used for low-operational streaming ingestion into data lakes.
+> **EXAM TIP**  
+> Kinesis scaling issues are often caused by poor partition key distribution.
 
 ---
 
-### Amazon MSK (Managed Kafka)
+## Kinesis Data Firehose
 
-**AWS Documentation:**  
-https://docs.aws.amazon.com/msk/latest/developerguide/what-is-msk.html  
+Documentation  
+https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html
 
-Managed Apache Kafka.
+Firehose is a managed streaming delivery service.
 
-- Partition-based scaling  
-- Consumer groups manage offsets  
-- Supports exactly-once semantics  
-- Serverless option for unpredictable workloads  
+Key characteristics:
 
-**MSK Serverless Docs:**  
-https://docs.aws.amazon.com/msk/latest/developerguide/serverless.html  
+- No shard management
+- Delivers to S3, Redshift, OpenSearch, and HTTP endpoints
+- Supports Lambda transformation
+- Near real-time delivery
+- Automatically scales
+
+Firehose does not support replay capability.
+
+Firehose is typically used for simplified streaming ingestion into data lakes.
+
+> **EXAM TIP**  
+> Managed streaming delivery with minimal operational overhead → Firehose.
 
 ---
 
-### Kinesis vs MSK Comparison
+## Amazon MSK
+
+Documentation  
+https://docs.aws.amazon.com/msk/latest/developerguide/what-is-msk.html
+
+Amazon MSK provides managed Apache Kafka clusters.
+
+Core characteristics:
+
+- Partition-based scaling
+- Consumer group offset management
+- Persistent log storage
+- Replay capability
+- Kafka ecosystem compatibility
+
+MSK Serverless supports automatic scaling for unpredictable workloads.
+
+Documentation  
+https://docs.aws.amazon.com/msk/latest/developerguide/serverless.html
+
+---
+
+## Kinesis vs MSK
 
 | Dimension | Kinesis | MSK |
-|------------|----------|------|
+|-----------|---------|-----|
 | Scaling Unit | Shard | Partition |
 | Replay | Yes | Yes |
-| Offset Management | Managed | Consumer-managed |
-| Kafka API Compatible | No | Yes |
+| Offset Management | Managed by service | Consumer-managed |
+| Kafka API Compatibility | No | Yes |
 
-MSK is selected when Kafka ecosystem compatibility is required.
-
----
-
-## Streaming Analytics
-
-### Kinesis Data Analytics (Apache Flink)
-
-**AWS Documentation:**  
-https://docs.aws.amazon.com/kinesisanalytics/latest/java/what-is.html  
-
-- SQL or Flink-based stream processing  
-- Windowed aggregations  
-- Stateful processing  
-- Fully managed  
+MSK is selected when Kafka protocol compatibility is required.
 
 ---
 
-### EMR Streaming
+# Streaming Analytics
 
-**AWS Documentation:**  
-https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-what-is-emr.html  
+## Kinesis Data Analytics
 
-- Spark Streaming  
-- Custom frameworks  
-- Long-running or complex pipelines  
-- More operational control  
+Documentation  
+https://docs.aws.amazon.com/kinesisanalytics/latest/java/what-is.html
 
----
+Kinesis Data Analytics provides stream processing using Apache Flink.
 
-## Data Lake Foundation
+Capabilities include:
 
-### S3 as Data Lake Storage
+- SQL-based streaming analytics
+- Stateful stream processing
+- Windowed aggregations
+- Real-time transformation pipelines
 
-**AWS Documentation:**  
-https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html  
-
-- Durable object storage  
-- Partitioning improves performance  
-- Columnar formats (Parquet, ORC) reduce cost  
+Used for continuous analytics on streaming data.
 
 ---
 
-### AWS Glue
+## EMR Streaming
 
-**AWS Documentation:**  
-https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html  
+Documentation  
+https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-what-is-emr.html
 
-Serverless ETL service.
+EMR supports streaming analytics using:
 
-### Capabilities
+- Apache Spark Streaming
+- Apache Flink
+- Custom frameworks
 
-- Spark-based transformations  
-- Glue Crawlers for schema discovery  
-- Glue Workflows  
-- Central Data Catalog  
+EMR streaming is used when:
 
-**Glue Data Catalog Docs:**  
-https://docs.aws.amazon.com/glue/latest/dg/catalog-and-crawler.html  
-
-Glue Data Catalog acts as central metadata store for:
-
-- Athena  
-- EMR  
-- Redshift Spectrum  
-- Lake Formation  
+- Custom frameworks are required
+- Long-running analytics pipelines exist
+- Operational control is necessary
 
 ---
 
-### Lake Formation
+# Data Lake Foundation
 
-**AWS Documentation:**  
-https://docs.aws.amazon.com/lake-formation/latest/dg/what-is-lake-formation.html  
+## Amazon S3 as Data Lake Storage
 
-Adds governance layer to S3 data lakes.
+Documentation  
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html
 
-- Fine-grained access control (table/column-level)  
-- LF-Tags for classification  
-- Cross-account sharing  
-- Centralized permission management  
+S3 provides durable object storage for data lakes.
 
-Used in enterprise multi-account data lakes.
+Key considerations:
 
----
-
-## Batch Processing
-
-### EMR
-
-**AWS Documentation:**  
-https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-overview.html  
-
-Managed Hadoop/Spark cluster.
-
-Deployment models:
-
-- EMR on EC2  
-- EMR on EKS  
-- EMR Serverless  
-
-**EMR Serverless Docs:**  
-https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/emr-serverless.html  
-
-Used when:
-
-- Persistent heavy Spark workloads  
-- Custom big data frameworks  
-- Spot-based cost optimization  
+- High durability
+- Virtually unlimited storage
+- Partitioning improves query performance
+- Columnar formats such as Parquet and ORC reduce query cost
 
 ---
 
-### Glue vs EMR Comparison
+## AWS Glue
+
+Documentation  
+https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html
+
+AWS Glue provides serverless ETL capabilities.
+
+Capabilities include:
+
+- Apache Spark-based data transformation
+- Glue Crawlers for schema discovery
+- Workflow orchestration
+- Centralized metadata management
+
+Glue Data Catalog acts as a central metadata repository.
+
+Documentation  
+https://docs.aws.amazon.com/glue/latest/dg/catalog-and-crawler.html
+
+The catalog is used by:
+
+- Athena
+- EMR
+- Redshift Spectrum
+- Lake Formation
+
+---
+
+## Lake Formation
+
+Documentation  
+https://docs.aws.amazon.com/lake-formation/latest/dg/what-is-lake-formation.html
+
+Lake Formation adds governance controls to data lakes.
+
+Capabilities include:
+
+- Fine-grained access control at table and column level
+- Tag-based access control using LF-Tags
+- Cross-account data sharing
+- Centralized permission management
+
+Lake Formation is commonly used in enterprise multi-account data lakes.
+
+---
+
+# Batch Processing
+
+## Amazon EMR
+
+Documentation  
+https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-overview.html
+
+EMR provides managed big data processing.
+
+Supported frameworks include:
+
+- Apache Spark
+- Hadoop
+- Hive
+- Presto
+
+Deployment models include:
+
+- EMR on EC2
+- EMR on EKS
+- EMR Serverless
+
+Documentation  
+https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/emr-serverless.html
+
+EMR is commonly used when:
+
+- Persistent Spark workloads are required
+- Custom frameworks must be deployed
+- Spot instance cost optimization is desired
+
+---
+
+## Glue vs EMR
 
 | Feature | Glue | EMR |
-|----------|------|------|
+|--------|------|-----|
 | Serverless | Yes | Optional |
 | Persistent Cluster | No | Yes |
 | Operational Control | Low | High |
-| Best For | Managed ETL | Large-scale custom processing |
+| Best For | Managed ETL | Custom big data workloads |
+
+Glue minimizes operational management while EMR offers full control.
 
 ---
 
-## Query Layer
+# Query Layer
 
-### Athena
+## Amazon Athena
 
-**AWS Documentation:**  
-https://docs.aws.amazon.com/athena/latest/ug/what-is.html  
+Documentation  
+https://docs.aws.amazon.com/athena/latest/ug/what-is.html
 
-Serverless SQL over S3.
+Athena provides serverless SQL querying over S3 data.
 
-- Charged per TB scanned  
-- Optimized with partitioning and compression  
-- Uses Glue Data Catalog  
-- Supports federated queries  
+Key characteristics:
 
-**Athena Federation Docs:**  
-https://docs.aws.amazon.com/athena/latest/ug/connectors-overview.html  
+- Pay-per-query pricing
+- Charged per TB scanned
+- Uses Glue Data Catalog
+- Supports partitioning and compression
+- Supports federated queries
 
-Allows querying:
+Documentation  
+https://docs.aws.amazon.com/athena/latest/ug/connectors-overview.html
 
-- RDS  
-- DynamoDB  
-- External sources via connectors  
+Athena federation allows querying external sources such as:
 
-Used for SQL access without moving data.
+- RDS
+- DynamoDB
+- External databases
 
----
-
-### Amazon Redshift
-
-**AWS Documentation:**  
-https://docs.aws.amazon.com/redshift/latest/dg/welcome.html  
-
-Massively parallel data warehouse.
-
-### Architecture
-
-- RA3 nodes separate compute and storage  
-- Managed storage tiering  
-- Concurrency Scaling  
-- Workload Management (WLM)  
-- Materialized Views  
-- COPY command for fast S3 ingestion  
-
-**RA3 & Managed Storage Docs:**  
-https://docs.aws.amazon.com/redshift/latest/dg/r_RA3_nodes.html  
+Athena enables analytics without moving data.
 
 ---
 
-### Redshift Data Sharing
+## Amazon Redshift
 
-**AWS Documentation:**  
-https://docs.aws.amazon.com/redshift/latest/dg/datashare-overview.html  
+Documentation  
+https://docs.aws.amazon.com/redshift/latest/dg/welcome.html
 
-- Share data across clusters  
-- No duplication  
-- Useful in multi-team analytics environments  
+Redshift is a massively parallel data warehouse.
+
+Architecture includes:
+
+- RA3 nodes separating compute and storage
+- Managed storage tiering
+- Workload Management
+- Concurrency scaling
+- Materialized views
+- COPY command for S3 ingestion
+
+Documentation  
+https://docs.aws.amazon.com/redshift/latest/dg/r_RA3_nodes.html
+
+RA3 nodes allow independent scaling of compute and storage.
 
 ---
 
-### Redshift vs Athena
+## Redshift Data Sharing
+
+Documentation  
+https://docs.aws.amazon.com/redshift/latest/dg/datashare-overview.html
+
+Redshift supports cross-cluster data sharing.
+
+Characteristics:
+
+- Data sharing without duplication
+- Supports multiple consumer clusters
+- Useful for multi-team analytics environments
+
+---
+
+## Redshift vs Athena
 
 | Feature | Athena | Redshift |
-|----------|---------|-----------|
-| Data Location | S3 | Internal + S3 (Spectrum) |
-| Best For | Ad-hoc queries | Enterprise BI |
-| Concurrency | Moderate | High (with scaling) |
-| Pricing | Per TB scanned | Provisioned / Serverless |
+|--------|--------|----------|
+| Data Location | S3 | Internal storage + S3 Spectrum |
+| Best For | Ad-hoc queries | Enterprise BI workloads |
+| Concurrency | Moderate | High with scaling |
+| Pricing | Per TB scanned | Provisioned or serverless |
+
+Athena is optimized for exploratory queries while Redshift supports enterprise analytics workloads.
 
 ---
 
-## OpenSearch
+# OpenSearch
 
-**AWS Documentation:**  
-https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html  
+Documentation  
+https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html
 
-Used for:
+OpenSearch provides search and analytics capabilities.
 
-- Log analytics  
-- Real-time search  
-- Text indexing  
-- Dashboarding  
+Typical use cases include:
 
-Not a replacement for Redshift.
+- Log analytics
+- Full-text search
+- Real-time dashboards
+- Index-based queries
 
-| Use Case | Choose |
-|-----------|--------|
-| BI dashboards | Redshift |
-| Log search | OpenSearch |
-| Ad-hoc SQL | Athena |
+OpenSearch is not designed as a data warehouse.
 
----
-
-## Lakehouse Architecture Patterns
-
-Common enterprise patterns:
-
-- S3 + Glue + Athena → Serverless lake  
-- S3 + Firehose → Streaming ingestion  
-- S3 + EMR → Heavy Spark ETL  
-- S3 + Redshift Spectrum → Hybrid lake + warehouse  
-- Lake Formation → Governance layer  
+| Use Case | Recommended Service |
+|----------|--------------------|
+| Enterprise BI dashboards | Redshift |
+| Log analytics | OpenSearch |
+| Ad-hoc SQL analytics | Athena |
 
 ---
 
-## Analytics Decision Matrix
+# Lakehouse Architecture Patterns
+
+Common enterprise data lake patterns include:
+
+S3 + Glue + Athena  
+Serverless data lake.
+
+S3 + Firehose  
+Streaming ingestion pipeline.
+
+S3 + EMR  
+Large-scale Spark processing.
+
+S3 + Redshift Spectrum  
+Hybrid lake and warehouse architecture.
+
+Lake Formation  
+Central governance layer.
+
+---
+
+# Analytics Decision Matrix
 
 | Requirement | Recommended Service |
 |-------------|---------------------|
-| Real-time replayable stream | Kinesis Streams |
-| Kafka compatibility | MSK |
-| Minimal streaming ops | Firehose |
-| Serverless ETL | Glue |
+| Real-time replayable streaming | Kinesis Data Streams |
+| Kafka ecosystem compatibility | Amazon MSK |
+| Minimal operational streaming ingestion | Firehose |
+| Serverless ETL | AWS Glue |
 | Persistent Spark cluster | EMR |
-| SQL on S3 | Athena |
-| Enterprise BI warehouse | Redshift |
-| Log analytics | OpenSearch |
-| Fine-grained lake governance | Lake Formation |
+| SQL queries on S3 | Athena |
+| Enterprise data warehouse | Redshift |
+| Log analytics and search | OpenSearch |
+| Fine-grained data lake governance | Lake Formation |
 
 ---
 
-## Common Pitfalls Observed in Analytics Architectures
+# Common Pitfalls
 
-- Poor partition key causing hot shards in Kinesis  
+- Poor partition key distribution causing hot shards in Kinesis  
 - Assuming Firehose supports replay  
-- Using Lambda for heavy ETL instead of Glue/EMR  
-- Ignoring Redshift WLM configuration  
+- Using Lambda for heavy ETL workloads  
+- Ignoring Redshift workload management configuration  
 - Choosing Athena for high-concurrency BI workloads  
-- Forgetting Glue Data Catalog central role  
-- Not implementing Lake Formation in multi-account lakes  
+- Overlooking Glue Data Catalog as central metadata layer  
+- Missing Lake Formation governance in multi-account lakes  
 - Underestimating storage growth without RA3 nodes  
 - Confusing OpenSearch with warehouse workloads  
 
-Analytics design becomes clearer when separated into:
+---
 
-- Ingestion layer  
-- Processing layer  
-- Storage layer  
-- Query layer  
-- Governance layer  
+# Design Considerations
 
-Each layer should scale independently.
+Analytics architecture typically separates concerns into independent layers.
+
+Key architectural layers include:
+
+- Ingestion layer
+- Processing layer
+- Storage layer
+- Query layer
+- Governance layer
+
+Each layer should scale independently to support evolving data volume, analytics complexity, and governance requirements.

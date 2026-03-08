@@ -1,129 +1,183 @@
 # Compute, Auto Scaling & Spot Notes (SAP-C02 Level)
 
-EC2 • Auto Scaling • Spot • Placement Groups • Savings • Capacity Rebalancing • Lifecycle Hooks • Instance Refresh • Capacity Reservations
+EC2 • Auto Scaling • Spot • Placement Groups • Savings Plans • Capacity Rebalancing • Lifecycle Hooks • Instance Refresh • Capacity Reservations
 
-These notes capture architectural patterns, trade-offs, scaling behavior, and resilience themes that repeatedly appear in SAP-C02 scenarios.
+These notes capture architectural patterns, failure-domain awareness, elasticity control, interruption trade-offs, and cost alignment themes that repeatedly appear in SAP-C02 scenarios.
+
+The emphasis is on understanding availability scope, scaling behavior, interruption tolerance, and workload alignment — not memorizing features.
 
 ---
 
-# Auto Scaling – Architectural Context
+# EC2 – Architectural Baseline
 
-📘 AWS Documentation  
-- Auto Scaling Overview:  
-  https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html  
-- Scaling Policies:  
-  https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scale-based-on-demand.html  
-- Launch Templates:  
-  https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-launch-templates.html  
+Documentation  
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html  
 
-Auto Scaling contributes to three core properties:
+EC2 provides raw compute within an Availability Zone.
 
-- Elasticity (capacity adjusts dynamically)
-- Resilience (when deployed across multiple AZs)
-- Cost control (scale-in during low demand)
+Core architectural properties:
 
-⚠️ Scaling alone does not imply high availability.  
+- AZ-scoped failure domain  
+- Instance lifecycle management  
+- Capacity type selection (On-Demand, Spot, Reserved, Savings Plans)  
+- AMI-driven immutability patterns  
+- Networking + security boundary alignment  
+
+A single EC2 instance is never highly available.
+
 High availability requires:
 
-- Multi-AZ deployment
-- Load balancer health checks
-- Proper termination policies
+- Multi-AZ deployment  
+- Load balancing  
+- Automated replacement  
+
+> **EXAM TIP**  
+> EC2 alone is never the HA solution.  
+> Look for Multi-AZ + ELB + Auto Scaling in resilient architectures.
 
 ---
 
-## Health Checks (Critical Detail)
+# Auto Scaling – Elastic Control Plane
 
-📘 Documentation:  
+Documentation  
+https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html  
+
+Auto Scaling provides:
+
+- Elasticity  
+- Self-healing  
+- Cost control via scale-in  
+- Rolling updates  
+
+Elasticity ≠ Availability.  
+Availability depends on AZ distribution and health checks.
+
+---
+
+## Health Checks
+
+Documentation  
 https://docs.aws.amazon.com/autoscaling/ec2/userguide/health-checks-overview.html  
 
-Auto Scaling supports:
+Supported checks:
 
-- EC2 status checks
-- ELB health checks (recommended)
+- EC2 status checks  
+- ELB health checks  
 
-ELB health checks detect application-level failure.  
-Without ELB health checks, failed applications may not be replaced.
+ELB health checks detect application-level failures.
+
+Without ELB health checks, a crashed application may not be replaced.
+
+> **EXAM TIP**  
+> Application failure detection → Use ELB health checks, not just EC2 checks.
 
 ---
 
-## Scaling Policies – When They Fit
+## Scaling Policies – Behavioral Fit
+
+Documentation  
+https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scale-based-on-demand.html  
 
 | Policy | Typical Fit | Observations |
 |---------|------------|--------------|
-| Target Tracking | Most workloads | Simplest and commonly sufficient |
-| Step Scaling | Fine-grained thresholds | Used when precise control required |
-| Scheduled Scaling | Predictable traffic | Known daily/seasonal patterns |
-| Predictive Scaling | Pattern-based growth | ML-based forecast |
+| Target Tracking | Most workloads | Simplest and default choice |
+| Step Scaling | Fine control required | Threshold-based scaling |
+| Scheduled Scaling | Predictable traffic | Known patterns |
+| Predictive Scaling | Forecast-based | ML-driven growth modeling |
 
-In SAP scenarios, Target Tracking is usually correct unless more control is explicitly required.
+Target Tracking is usually correct unless precise threshold control is required.
 
----
-
-## Instance Refresh
-
-📘 Documentation:  
-https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-instance-refresh.html  
-
-Instance Refresh:
-
-- Gradually replaces instances
-- Supports rolling updates
-- Maintains minimum healthy percentage
-- Useful for AMI upgrades
-
-Preferred over manual termination during production updates.
-
----
-
-## Lifecycle Hooks
-
-📘 Documentation:  
-https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html  
-
-Lifecycle Hooks allow:
-
-- Custom actions during launch or termination
-- Graceful shutdown
-- Data draining
-- Log export
-- Checkpoint saving
-
-Frequently used in Spot interruption handling.
+> **EXAM TIP**  
+> If no special requirement is stated, Target Tracking is typically sufficient.
 
 ---
 
 ## Launch Template vs Launch Configuration
 
+Documentation  
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-launch-templates.html  
+
 | Feature | Launch Template | Launch Config |
 |----------|----------------|---------------|
-| Mixed Instance Types | Supported | Not supported |
-| Spot Integration | Full support | Limited |
+| Mixed Instances | Supported | Not supported |
+| Spot Integration | Full | Limited |
 | Versioning | Yes | No |
 | Advanced Networking | Yes | Limited |
 | Capacity Reservations | Supported | Limited |
 
-Launch Templates are preferred in modern architectures.
+Launch Templates are the modern standard.
 
 ---
 
-# Mixed Instance Policies (MIP)
+## Instance Refresh
 
-📘 Documentation:  
+Documentation  
+https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-instance-refresh.html  
+
+Instance Refresh:
+
+- Gradual instance replacement  
+- Rolling AMI updates  
+- Maintains minimum healthy percentage  
+- Safer than manual termination  
+
+Preferred approach for production AMI updates.
+
+---
+
+## Lifecycle Hooks
+
+Documentation  
+https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html  
+
+Lifecycle Hooks allow:
+
+- Custom launch actions  
+- Graceful termination  
+- Log export  
+- Data draining  
+- Checkpoint saving  
+
+Often used for Spot interruption handling.
+
+---
+
+# Mixed Instance Policies
+
+Documentation  
 https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-mixed-instances-groups.html  
 
-Mixed Instance Policies allow blending:
+Allows blending:
 
-- Instance families and sizes
-- On-Demand and Spot capacity
-- Flexible allocation strategies
+- Multiple instance types  
+- On-Demand + Spot capacity  
+- Allocation strategies  
 
-Improves both cost efficiency and capacity resilience.
+Improves:
+
+- Cost efficiency  
+- Capacity diversification  
+- Interruption resilience  
+
+Diversification reduces capacity risk.
+
+---
+
+# Spot Instances – Interruption Awareness
+
+Documentation  
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html  
+
+Spot provides cost savings with interruption risk.
+
+Architectural question:  
+Is the workload interruption-tolerant?
 
 ---
 
 ## Spot Allocation Strategies
 
-📘 Documentation:  
+Documentation  
 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-allocation-strategies.html  
 
 | Strategy | Characteristics |
@@ -132,228 +186,214 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-allocation-strategies.h
 | price-capacity-optimized | Balanced |
 | lowest-price | Highest interruption risk |
 
-For production HA workloads, capacity-optimized is typically safer than lowest-price.
+Lowest-price is rarely correct for production HA workloads.
 
----
-
-# Spot Instances – Trade-Off Awareness
-
-📘 Documentation:  
-https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html  
-
-Spot provides cost savings but introduces interruption risk.
-
-Architectural question:
-Is this workload interruption-tolerant?
+> **EXAM TIP**  
+> Production + Spot → capacity-optimized allocation.
 
 ---
 
 ## Interruption Handling
 
-📘 Documentation:  
+Documentation  
 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-instance-termination-notices.html  
 
-- 2-minute termination notice
-- Lifecycle hooks
-- Checkpointing
-- Capacity Rebalancing
+- 2-minute termination notice  
+- Lifecycle hooks  
+- Checkpointing  
+- Graceful shutdown logic  
+
+Workloads must tolerate termination.
 
 ---
 
 ## Capacity Rebalancing
 
-📘 Documentation:  
+Documentation  
 https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-capacity-rebalancing.html  
 
 When interruption risk increases:
 
-- ASG launches replacement before termination
-- Reduces service disruption
-- Critical for production Spot usage
+- ASG proactively launches replacement  
+- Reduces disruption window  
+- Improves production safety  
+
+Critical when running Spot in HA systems.
 
 ---
 
-## Workloads Suitable for Spot
+## Suitable Workloads for Spot
 
-- Stateless services
-- Batch jobs
-- CI/CD workers
-- Big data processing
-- Container hosts
+- Stateless services  
+- Batch processing  
+- CI/CD runners  
+- Big data  
+- Container worker nodes  
 
 ---
 
-## Workloads Unsuitable for Spot
+## Unsuitable Workloads for Spot
 
-- Databases
-- Stateful single-instance workloads
-- Single-AZ critical clusters
-- Non-checkpointable long-running jobs
+- Primary databases  
+- Stateful single-instance systems  
+- Single-AZ clusters  
+- Non-checkpointable long-running jobs  
 
 ---
 
 # EC2 Placement Groups
 
-📘 Documentation:  
+Documentation  
 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/placement-groups.html  
 
 | Type | Use Case | Characteristic |
 |------|----------|----------------|
 | Cluster | HPC / ML | Low latency within AZ |
 | Spread | Small critical systems | Instance-level isolation |
-| Partition | Large distributed systems | Partition-level isolation |
+| Partition | Large distributed systems | Partition-level fault isolation |
+
+Placement Groups operate within a single AZ.
 
 ---
 
-# Elastic Fabric Adapter (EFA)
+# Elastic Fabric Adapter
 
-📘 Documentation:  
+Documentation  
 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/efa.html  
 
 Used for:
 
-- HPC
-- Distributed ML
-- MPI workloads
+- HPC  
+- Distributed ML  
+- MPI workloads  
 
 Typically paired with:
 
-- Cluster Placement Groups
-- Specialized instance types
+- Cluster Placement Groups  
+- Specialized instance types  
 
 ---
 
 # Capacity Reservations
 
-📘 Documentation:  
+Documentation  
 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-capacity-reservations.html  
 
 Used when:
 
-- Guaranteed capacity required
-- Regulatory or critical workloads
-- AZ capacity constraints
+- Guaranteed AZ capacity required  
+- Regulatory constraints  
+- High-demand regions  
 
-Different from Savings Plans (financial) — this guarantees physical capacity.
+Capacity Reservations guarantee physical capacity.
+
+Different from Savings Plans, which are financial commitments only.
+
+> **EXAM TIP**  
+> Guaranteed capacity requirement → Capacity Reservation, not Savings Plan.
 
 ---
 
 # EC2 Fleet
 
-📘 Documentation:  
+Documentation  
 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-fleet.html  
 
 EC2 Fleet:
 
-- Launches On-Demand + Spot
-- Multiple instance types
-- Capacity diversification
+- Launches On-Demand + Spot  
+- Multiple instance types  
+- Capacity diversification  
 
-Often used for large-scale distributed workloads.
+Often used for distributed or large-scale compute.
 
 ---
 
-# Cost Optimization
+# Cost Optimization Patterns
 
-📘 Documentation  
-- Savings Plans:  
-  https://docs.aws.amazon.com/savingsplans/latest/userguide/what-is-savings-plans.html  
-- Reserved Instances:  
-  https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-reserved-instances.html  
-- Graviton:  
-  https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/graviton.html  
+Documentation  
+
+Savings Plans  
+https://docs.aws.amazon.com/savingsplans/latest/userguide/what-is-savings-plans.html  
+
+Reserved Instances  
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-reserved-instances.html  
+
+Graviton  
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/graviton.html  
 
 | Option | Fit |
 |---------|-----|
-| Savings Plans | Flexible steady usage |
-| Reserved Instances | Fixed steady workloads |
-| Spot | Interruption-tolerant |
+| Savings Plans | Flexible steady baseline |
+| Reserved Instances | Fixed predictable workloads |
+| Spot | Interruption-tolerant workloads |
 | Graviton | Better price/performance |
 
-Savings Plans are generally more flexible than RIs.
+Savings Plans are generally more flexible than Reserved Instances.
 
 ---
 
-# Dedicated Hosts vs Dedicated Instances
+# Dedicated Instances vs Dedicated Hosts
 
-📘 Documentation:  
+Documentation  
 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/dedicated-hosts-overview.html  
 
 | Feature | Dedicated Instance | Dedicated Host |
 |----------|------------------|----------------|
 | Hardware Isolation | Yes | Yes |
-| Visibility of host | No | Yes |
-| License control | Limited | Full |
-| Compliance workloads | Moderate | Strong |
+| Host Visibility | No | Yes |
+| License Control | Limited | Full |
+| BYOL | Limited | Strong support |
 
-Dedicated Hosts used for:
+Dedicated Hosts are commonly used for:
 
-- BYOL licensing
-- Regulatory compliance
+- BYOL licensing  
+- Compliance-sensitive workloads  
 
 ---
 
-# Load Balancer Interaction (Important)
+# Load Balancer Interaction
 
-📘 Documentation:  
+Documentation  
 https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html  
 
 ALB:
 
-- HTTP/HTTPS
-- Path-based routing
+- HTTP/HTTPS  
+- Path-based routing  
 
 NLB:
 
-- TCP/UDP
-- Ultra-low latency
+- TCP/UDP  
+- Ultra-low latency  
 
-ELB health checks integrate with Auto Scaling.
+ELB health checks integrate with Auto Scaling for replacement automation.
 
 ---
 
 # Common Compute Themes in SAP-C02
 
-- Scaling ≠ high availability  
+- Elasticity does not imply availability  
 - Spot requires interruption tolerance  
 - Launch Templates over Launch Configurations  
 - Multi-AZ required for resilience  
-- Use ELB health checks  
-- Consider startup latency  
+- ELB health checks critical  
 - Diversify instance types for Spot  
+- Handle AMI updates via Instance Refresh  
 
 ---
 
-# Mental Model Summary
+# Design Considerations
 
-Resilience:
-- Multi-AZ
-- Health checks
-- Load balancing
-- Replacement automation
+Compute architecture decisions usually align with:
 
-Elasticity:
-- Auto Scaling
-- Scaling policy
-- Mixed instance diversification
+- Failure domain scope (AZ vs Region)  
+- Interruption tolerance  
+- Startup latency sensitivity  
+- Traffic predictability  
+- State management strategy  
+- Cost baseline vs burst model  
+- Capacity guarantees required  
 
-Cost Optimization:
-- Spot where safe
-- Savings Plans for steady baseline
-- Graviton for efficiency
-- Avoid over-provisioning
-
----
-
-# Common Pitfalls Observed in SAP-C02
-
-- Confusing elasticity with availability  
-- Choosing lowest-price Spot allocation  
-- Ignoring ELB health checks  
-- Deploying production in single AZ  
-- Not handling Spot interruption  
-- Overcomplicating scaling policy  
-- Forgetting instance refresh during AMI updates  
-- Ignoring capacity constraints in busy regions  
-
-Architectural decisions should always align with workload characteristics, not just pricing or simplicity.
+Resilience is achieved through distribution and automation.  
+Cost efficiency comes from matching workload behavior to capacity type.

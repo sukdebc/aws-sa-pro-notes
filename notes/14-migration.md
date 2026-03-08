@@ -8,187 +8,256 @@ The emphasis is on choosing the correct strategy based on downtime tolerance, da
 
 ---
 
-# 1️⃣ Migration Strategies – The 7 R’s
+# Migration Strategies – The 7 R’s
 
-📘 AWS Migration Strategy Docs:  
+Documentation  
 https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-selection/what-is-migration.html
 
-Migration decisions begin with selecting the appropriate transformation strategy.
-
-## Rehost (Lift & Shift)
-
-- Move workloads as-is
-- Uses EC2, VM Import/Export, or AWS MGN
-- Minimal application changes
-- Fastest migration approach
-- Common for large, time-sensitive migrations
+Migration decisions usually begin by selecting the right transformation strategy.
 
 ---
 
-## Replatform (Lift & Reshape)
+## Rehost
 
-- Minor optimizations without full redesign
-- Examples:
-  - Move database from EC2 to RDS
-  - Replace self-managed queue with SQS
-  - Move app to Elastic Beanstalk
-- Improves operational efficiency while limiting risk
+Rehost is lift-and-shift migration.
+
+Characteristics:
+
+- Move workloads largely as-is
+- Minimal application changes
+- Fastest migration approach
+- Often uses EC2, VM Import/Export, or AWS MGN
+
+Common when migration speed matters more than modernization.
+
+---
+
+## Replatform
+
+Replatform introduces limited optimization without redesign.
+
+Examples include:
+
+- Moving a database from EC2 to RDS
+- Replacing a self-managed queue with SQS
+- Moving an application to Elastic Beanstalk
+
+This improves operations while keeping migration risk moderate.
 
 ---
 
 ## Repurchase
 
-- Replace application with SaaS
-- Example: CRM, HR systems
-- Reduces infrastructure management
+Repurchase replaces the existing application with SaaS.
+
+Typical examples:
+
+- CRM systems
+- HR platforms
+- Collaboration tools
+
+This reduces infrastructure management but may require business process change.
 
 ---
 
-## Refactor (Re-architect)
+## Refactor
 
-- Significant architectural redesign
-- Often involves microservices or serverless
-- Highest complexity and long-term benefit
+Refactor involves significant architectural redesign.
+
+Typical patterns include:
+
+- Microservices
+- Serverless
+- Event-driven decomposition
+
+This has the highest complexity but often gives the greatest long-term benefit.
 
 ---
 
 ## Retire
 
-- Decommission unused systems
-- Reduces migration scope
+Retire means decommissioning systems that are no longer needed.
+
+Benefits include:
+
+- Reduced migration scope
+- Lower cost
+- Less operational overhead
 
 ---
 
 ## Retain
 
-- Keep certain workloads on-prem temporarily
-- Used when regulatory or technical constraints prevent migration
+Retain means keeping some workloads on premises temporarily.
+
+This is used when:
+
+- Regulatory constraints exist
+- Technical dependencies remain
+- Migration is not yet practical
 
 ---
 
 ## Relocate
 
-- Hypervisor-level migration
-- Example: VMware → VMware Cloud on AWS
-- No application-level changes
+Relocate is hypervisor-level migration with minimal application change.
+
+Typical example:
+
+- VMware workloads moved to VMware Cloud on AWS
+
+This preserves the existing virtualization model.
+
+> **EXAM TIP**  
+> Large-scale lift-and-shift with minimal change → Rehost.  
+> Hypervisor-level VMware move → Relocate.
 
 ---
 
-# 2️⃣ Database Migration
+# Database Migration
 
-## AWS Database Migration Service (DMS)
+## AWS Database Migration Service
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html
 
-DMS is responsible for **data movement**, not schema transformation.
+DMS is responsible for moving data rather than transforming schema.
 
-### Capabilities
+Capabilities include:
 
-- Homogeneous migrations (MySQL → MySQL)
-- Heterogeneous migrations (Oracle → PostgreSQL)
+- Homogeneous migrations
+- Heterogeneous migrations
 - Full load
-- Change Data Capture (CDC)
-- Full load + CDC for minimal downtime
+- Change Data Capture
+- Full load plus CDC
 
-### Architecture Considerations
+Architecture considerations:
 
-- Requires replication instance inside a VPC
-- Needs network connectivity to source and target
-- Instance size affects throughput
-- Supports ongoing replication
+- Requires a replication instance in a VPC
+- Needs connectivity to source and target
+- Replication instance size affects throughput
+- Supports ongoing replication for minimal downtime cutovers
 
 DMS does not:
 
 - Convert schema
-- Convert stored procedures completely
-- Automatically fix incompatible data types
+- Fully convert stored procedures
+- Automatically resolve incompatible data types
+
+> **EXAM TIP**  
+> DMS moves data.  
+> It does not perform schema conversion.
 
 ---
 
-## AWS Schema Conversion Tool (SCT)
+## AWS Schema Conversion Tool
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/SchemaConversionTool/latest/userguide/Welcome.html
 
-SCT converts database schema during heterogeneous migrations.
+SCT is used for schema conversion during heterogeneous database migrations.
 
-### Capabilities
+Capabilities include:
 
 - Schema conversion
-- Stored procedure translation (partial support)
-- Assessment reports
-- Compatibility analysis
+- Partial stored procedure translation
+- Compatibility assessment reports
+- Migration complexity analysis
 
-SCT is typically paired with DMS for heterogeneous migrations.
+SCT is commonly paired with DMS when source and target engines differ.
 
 ---
 
-## DMS vs SCT Comparison
+## DMS vs SCT
 
 | Dimension | DMS | SCT |
-|------------|------|------|
+|----------|-----|-----|
 | Moves Data | Yes | No |
 | Converts Schema | No | Yes |
 | Supports CDC | Yes | No |
-| Used for Homogeneous Migration | Yes | Optional |
-| Used for Heterogeneous Migration | Yes | Required |
+| Homogeneous Migration | Yes | Optional |
+| Heterogeneous Migration | Yes | Usually required |
 
 ---
 
-# 3️⃣ Database Cutover Patterns
+# Database Cutover Patterns
 
 ## Full Load Only
 
+Characteristics:
+
 - Requires downtime
-- Suitable for non-critical systems
-- Simpler migration approach
+- Simpler migration process
+- Suitable for non-critical workloads
 
 ---
 
-## Full Load + CDC
+## Full Load plus CDC
 
-- Minimal downtime
-- Source continues accepting writes
-- Cutover when replication lag approaches zero
+Characteristics:
 
-This is the most common pattern for production migrations.
+- Supports minimal downtime migration
+- Source system continues accepting writes
+- Cutover occurs when replication lag is near zero
 
----
-
-## Blue/Green Pattern
-
-- Deploy parallel environment
-- Synchronize data
-- Switch DNS or routing after validation
-- Enables rollback if necessary
-
-Cutover strategy depends on RTO/RPO tolerance.
+This is the most common production migration pattern.
 
 ---
 
-# 4️⃣ Large-Scale Data Transfer (Snow Family)
+## Blue/Green Cutover
 
-📘 Snowball Docs:  
+Characteristics:
+
+- Parallel environments
+- Data synchronization before switch
+- Validation before traffic shift
+- Easier rollback path
+
+Cutover design should always align with RTO and RPO expectations.
+
+> **EXAM TIP**  
+> Minimal downtime database migration → Full load + CDC.
+
+---
+
+# Large-Scale Data Transfer
+
+Documentation
+
+Snowball  
 https://docs.aws.amazon.com/snowball/latest/ug/whatissnowball.html  
-📘 Snowmobile Docs:  
+
+Snowmobile  
 https://docs.aws.amazon.com/snowball/latest/ug/whatissnowmobile.html
+
+---
 
 ## Snowball Edge
 
-- 10–80 TB usable capacity
-- Offline migration
+Snowball Edge is used for offline data transfer where network bandwidth is limited.
+
+Characteristics:
+
+- Tens of terabytes of usable capacity per device
 - Automatic encryption
-- Edge compute support
-- Suitable when bandwidth is constrained
+- Chain-of-custody controls
+- Edge compute capability on some device types
+
+Used when transferring data over the network is too slow or impractical.
 
 ---
 
 ## Snowmobile
 
+Snowmobile is designed for extremely large migrations.
+
+Characteristics:
+
 - Up to 100 PB per device
-- Designed for data center migrations
 - Physical secure transport
+- Suitable for data center-scale migrations
+
+Used for very large-scale data transfers that are impractical over standard networks.
 
 ---
 
@@ -196,100 +265,125 @@ https://docs.aws.amazon.com/snowball/latest/ug/whatissnowmobile.html
 
 | Data Volume | Recommended Approach |
 |-------------|----------------------|
-| < 1 TB | Internet / VPN / Direct Connect |
-| 1–50 TB | Snowball Edge |
-| 50+ PB | Snowmobile |
+| Small to moderate | Internet, VPN, or Direct Connect |
+| Tens of TB | Snowball Edge |
+| Massive PB-scale migration | Snowmobile |
 
-Bandwidth, security, and timeline influence selection.
+Bandwidth, security, and migration timeline usually drive the choice.
+
+> **EXAM TIP**  
+> Large dataset with constrained bandwidth → Snow family, not internet transfer.
 
 ---
 
-# 5️⃣ Application & VM Migration
+# Application and VM Migration
 
-## AWS Application Migration Service (MGN)
+## AWS Application Migration Service
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/mgn/latest/ug/what-is-application-migration-service.html
 
+AWS MGN supports lift-and-shift server migration.
+
+Core characteristics:
+
 - Continuous block-level replication
-- Near-zero downtime
+- Minimal downtime cutover
 - Test cutovers supported
-- Converts servers into EC2 instances
-- Supports large-scale lift-and-shift
+- Converts source servers into EC2 instances
+- Suitable for large-scale rehost migrations
+
+MGN is commonly chosen for server migration with minimal application change.
 
 ---
 
 ## VM Import/Export
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/vm-import/latest/userguide/what-is-vmimport.html
 
-- Converts VM images into AMIs
-- No continuous replication
-- Suitable for one-time migration
+VM Import/Export converts VM images into AMIs.
+
+Characteristics:
+
+- One-time image-based migration
+- No ongoing replication
+- More suitable for smaller or one-off migrations
+
+It is not the best option for large-scale near-zero downtime migration.
 
 ---
 
 ## MGN vs VM Import/Export
 
 | Feature | MGN | VM Import/Export |
-|----------|------|-----------------|
+|--------|-----|------------------|
 | Continuous Replication | Yes | No |
 | Cutover Testing | Yes | Limited |
 | Downtime | Minimal | Higher |
-| Best For | Large-scale rehost | Single VM import |
+| Best Fit | Large-scale rehost | One-time VM image migration |
 
 ---
 
-# 6️⃣ Hybrid & Network Migration
+# Hybrid and Network Migration
 
-Migration often requires secure hybrid connectivity.
+Documentation
 
-📘 Direct Connect Docs:  
+Direct Connect  
 https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html  
-📘 VPN Docs:  
+
+Site-to-Site VPN  
 https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html
 
-Connectivity options:
+Migration often requires temporary or long-term hybrid connectivity.
+
+Common connectivity options include:
 
 - Site-to-Site VPN
 - Direct Connect
 - Transit Gateway
-- Hybrid DNS configuration
+- Hybrid DNS integration
 
-Considerations:
+Design considerations include:
 
 - Latency
 - Throughput
 - Security
-- Data transfer cost
+- Transfer cost
+- Reliability
 
-Direct Connect is often preferred for sustained high-throughput database replication.
+Direct Connect is often preferred for sustained high-throughput replication workloads such as database migration.
 
 ---
 
-# 7️⃣ File System Migration
+# File System Migration
 
 ## AWS DataSync
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/datasync/latest/userguide/what-is-datasync.html
 
-Used for:
+DataSync is optimized for file and object transfer.
 
-- NFS → EFS
-- SMB → FSx for Windows
-- On-prem → S3
-- AWS → AWS file transfers
+Common use cases include:
 
-Capabilities:
+- NFS to EFS
+- SMB to FSx for Windows File Server
+- On-premises to S3
+- AWS to AWS file transfer
 
-- Parallel transfer
-- Built-in encryption
-- Scheduling support
+Capabilities include:
+
+- Parallelized transfer
+- Encryption in transit
+- Scheduling
 - Incremental sync
 
-DataSync is optimized for file-based migration, not database migration.
+DataSync is designed for file migration, not relational database migration.
+
+> **EXAM TIP**  
+> File share migration → DataSync.  
+> Database migration → DMS.
 
 ---
 
@@ -299,51 +393,56 @@ DataSync is optimized for file-based migration, not database migration.
 |----------|---------------------|
 | NFS to EFS | DataSync |
 | SMB to FSx | DataSync |
-| Hybrid file gateway | Storage Gateway |
+| Hybrid cached file access | Storage Gateway |
 | Database migration | DMS |
 
 ---
 
-# 8️⃣ Migration Decision Matrix
+# Migration Decision Matrix
 
 | Scenario | Recommended Approach |
-|-----------|----------------------|
-| Oracle → PostgreSQL | SCT + DMS |
-| 5 TB DB minimal downtime | DMS Full Load + CDC |
-| 100 TB data transfer | Snowball |
+|----------|----------------------|
+| Oracle to PostgreSQL | SCT + DMS |
+| Multi-TB database with minimal downtime | DMS full load + CDC |
+| Large offline data transfer | Snowball Edge |
 | Massive data center exit | Snowmobile |
-| 50 VMs lift-and-shift | MGN |
+| Large VM lift-and-shift migration | MGN |
 | File share migration | DataSync |
-| Hybrid database replication | DMS + Direct Connect |
+| Hybrid replication with high throughput | DMS + Direct Connect |
 
-Decision clarity depends on:
+Decision clarity usually depends on:
 
 - Downtime tolerance
-- Data size
+- Data volume
 - Schema compatibility
-- Bandwidth constraints
-- Application dependencies
+- Available bandwidth
+- Dependency complexity
 
 ---
 
-# 9️⃣ Common Pitfalls in Migration Projects
+# Common Pitfalls
 
-- Assuming DMS converts schema automatically.
-- Ignoring stored procedure incompatibilities in heterogeneous migrations.
-- Underestimating bandwidth limitations.
-- Choosing internet transfer for large datasets without evaluating Snow devices.
-- Forgetting replication instances require correct VPC routing and security groups.
-- Using DataSync for database migration.
-- Assuming all database engines are fully supported as DMS targets.
-- Skipping cutover rehearsal before production migration.
-- Ignoring rollback planning.
+- Assuming DMS converts schema automatically  
+- Ignoring stored procedure incompatibilities in heterogeneous migration  
+- Underestimating bandwidth limits  
+- Choosing internet transfer for very large datasets without evaluating Snow devices  
+- Forgetting DMS replication instances need correct VPC routing and security groups  
+- Using DataSync for database migration  
+- Assuming every database target is equally supported by DMS  
+- Skipping cutover rehearsal before production migration  
+- Ignoring rollback planning  
 
-Migration planning improves when evaluating:
+---
 
-- Downtime tolerance (RTO/RPO)
-- Compatibility gaps
-- Data size vs bandwidth
-- Cutover rollback strategy
-- Operational complexity post-migration
+# Design Considerations
 
-Understanding these dimensions ensures smoother transitions and reduced migration risk.
+Migration decisions typically become clearer when evaluated across:
+
+- Downtime tolerance and recovery objectives
+- Schema and application compatibility
+- Data size versus available bandwidth
+- Need for replication versus one-time copy
+- Rollback and cutover strategy
+- Post-migration operational complexity
+
+The right migration pattern usually comes from aligning business downtime tolerance with data movement method, compatibility constraints, and target-state architecture.

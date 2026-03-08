@@ -2,354 +2,303 @@
 
 S3 • EFS • FSx • EBS • Storage Gateway • DataSync
 
-These notes summarize object, file, and block storage services in AWS, including cross-account access, encryption models, hybrid integration, and migration patterns.
+These notes capture key storage services across object, file, and block models, along with availability scope, encryption behavior, replication models, hybrid integration, and migration considerations.
 
-The emphasis is on selecting the correct storage architecture based on protocol, performance, operating system, availability scope, and multi-region strategy.
-
----
-
-# 1️⃣ Amazon S3
-
-📘 Docs: https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html
-
-S3 is the foundational object storage service in AWS.
-
-- Region-scoped
-- 11 9’s durability
-- Horizontally scalable
-- Strong read-after-write consistency (for PUT and DELETE)
-
-S3 is not inside a VPC.
+The emphasis is on understanding how protocol, durability needs, operating system, and recovery scope influence storage selection.
 
 ---
 
-## S3 Storage Classes
+# Amazon S3 (Object Storage)
 
-| Storage Class | Typical Use Case | Key Characteristics |
-|---------------|------------------|--------------------|
-| Standard | Frequently accessed data | Low latency, high durability |
-| Standard-IA | Infrequent access | 30-day minimum, retrieval fee |
-| One Zone-IA | Non-critical infrequent data | Single AZ |
-| Intelligent-Tiering | Unknown access patterns | Auto tier movement |
-| Glacier Instant Retrieval | Archive with ms retrieval | Lower cost than IA |
-| Glacier Flexible Retrieval | Archive, minutes-hours retrieval | Restore required |
-| Glacier Deep Archive | Rare access | 12–48 hour retrieval |
+**Documentation:**  
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html
 
-Storage class selection is driven by access frequency and RTO requirements.
+S3 is AWS’s foundational object storage service.
+
+- Region-scoped  
+- 11 9’s durability  
+- Strong read-after-write consistency  
+- Virtually unlimited horizontal scaling  
+- Not deployed inside a VPC  
+
+---
+
+## Storage Classes
+
+| Class | Typical Use | Key Trait |
+|--------|------------|-----------|
+| Standard | Frequent access | Low latency |
+| Standard-IA | Infrequent | 30-day minimum |
+| One Zone-IA | Non-critical | Single AZ |
+| Intelligent-Tiering | Unknown pattern | Auto tiering |
+| Glacier Instant | Archive + fast retrieval | Millisecond restore |
+| Glacier Flexible | Archive | Minutes–hours restore |
+| Glacier Deep Archive | Long-term archive | 12–48 hr restore |
+
+Selection typically reflects access frequency and recovery time expectations.
+
+> **EXAM TIP**  
+> Archive + fast restore → Glacier Instant.  
+> Very long-term archive → Deep Archive.
 
 ---
 
 ## Performance & Scaling
 
-📘 Performance Docs: https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance.html
+**Documentation:**  
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance.html
 
-- 3,500 PUT/COPY/POST/DELETE per prefix
-- 5,500 GET/HEAD per prefix
-- Automatic scaling
-- Multipart upload recommended for >100 MB
-- S3 Select allows partial object retrieval
+- 3,500 PUT/COPY/POST/DELETE per prefix  
+- 5,500 GET/HEAD per prefix  
+- Automatic scaling  
+- Multipart upload recommended for large objects  
 
-Prefix distribution improves parallel performance.
-
----
-
-## Consistency Model
-
-- Strong consistency for new objects
-- Strong consistency for overwrite and delete
-- No eventual consistency model anymore
-
-Important for data lake and analytics design.
+Prefix distribution improves parallel access.
 
 ---
 
-## Encryption Options
+## Encryption
 
-📘 Encryption Docs: https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingEncryption.html
+**Documentation:**  
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingEncryption.html
 
-- Client-side encryption
-- SSE-S3 (AWS-managed)
-- SSE-KMS (KMS-managed)
-- SSE-C (customer-provided key)
+Options include:
 
-SSE-KMS requires:
+- SSE-S3  
+- SSE-KMS  
+- SSE-C  
+- Client-side encryption  
 
-- IAM permission
-- KMS key policy permission
+With SSE-KMS, access depends on both IAM permissions and KMS key policy alignment.
 
----
-
-## Access & Networking
-
-📘 VPC Endpoint Docs: https://docs.aws.amazon.com/vpc/latest/privatelink/
-
-Important facts:
-
-- Gateway Endpoint enables private access
-- S3 Access Points simplify multi-tenant access
-- Block Public Access overrides bucket policy
-- Cross-account access requires:
-  - Bucket policy allow
-  - IAM allow
-  - KMS key policy (if encrypted)
+> **EXAM TIP**  
+> If access works but encryption fails, KMS key policy is often the cause.
 
 ---
 
 ## Replication
 
-📘 Replication Docs: https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html
+**Documentation:**  
+https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html
 
-- Cross-Region Replication (CRR)
-- Same-Region Replication (SRR)
-- Asynchronous
-- Versioning required
-- Replicates new objects only
+- Same-Region Replication (SRR)  
+- Cross-Region Replication (CRR)  
+- Asynchronous  
+- Versioning required  
 
-Used for DR and compliance, not strong consistency.
-
----
-
-# 2️⃣ Amazon EFS
-
-📘 Docs: https://docs.aws.amazon.com/efs/
-
-EFS provides fully managed NFS-based file storage.
-
-- Multi-AZ
-- POSIX-compliant
-- Auto scaling
-- Designed for Linux workloads
+Used for DR and compliance scenarios rather than strict zero RPO designs.
 
 ---
 
-## Performance Modes
+# Amazon EBS (Block Storage)
 
-| Mode | Use Case |
-|------|----------|
-| General Purpose | Low-latency apps |
-| Max I/O | Highly parallel workloads |
+**Documentation:**  
+https://docs.aws.amazon.com/ebs/
 
----
+Persistent block storage for EC2.
 
-## Throughput Modes
-
-- Bursting (default)
-- Provisioned
-- Elastic throughput
-
----
-
-## EFS Replication
-
-📘 Docs: https://docs.aws.amazon.com/efs/latest/ug/efs-replication.html
-
-- Asynchronous cross-region replication
-- Typical RPO ~15 minutes
-
-Used for DR scenarios.
-
----
-
-# 3️⃣ Amazon FSx Family
-
-📘 Docs: https://docs.aws.amazon.com/fsx/
-
-FSx provides managed file systems optimized for specific workloads.
-
----
-
-## FSx for Windows File Server
-
-📘 Docs: https://docs.aws.amazon.com/fsx/latest/WindowsGuide/
-
-- SMB protocol
-- Active Directory integration required
-- NTFS ACL support
-- Multi-AZ deployment option
-
-Best for Windows-native workloads.
-
----
-
-## FSx for Lustre
-
-📘 Docs: https://docs.aws.amazon.com/fsx/latest/LustreGuide/
-
-- High-performance HPC workloads
-- POSIX compliant
-- Native S3 integration
-- Scratch and Persistent deployment options
-
-Common in ML and analytics.
-
----
-
-## FSx for NetApp ONTAP
-
-📘 Docs: https://docs.aws.amazon.com/fsx/latest/ONTAPGuide/
-
-- Multi-protocol (NFS, SMB, iSCSI)
-- SnapMirror support
-- Enterprise hybrid integration
-- Storage efficiency features
-
-Ideal for NetApp-heavy environments.
-
----
-
-# 4️⃣ Amazon EBS
-
-📘 Docs: https://docs.aws.amazon.com/ebs/
-
-EBS provides persistent block storage for EC2.
-
-- AZ-scoped
-- Low latency
-- Suitable for databases and OS volumes
-
----
-
-## Volume Types
-
-| Type | Use Case |
-|------|----------|
-| gp3 | General-purpose SSD |
-| io1/io2 | High IOPS workloads |
-| st1 | Throughput-intensive HDD |
-| sc1 | Cold HDD |
-
----
-
-## Multi-Attach
-
-- Supported for io1/io2
-- Allows attachment to multiple instances
-- Limited use cases (clustered apps)
+- AZ-scoped  
+- Low latency  
+- Common for databases and OS volumes  
 
 ---
 
 ## Snapshots
 
-- Incremental
-- Stored in S3 internally
-- Cross-account sharing supported
-- Cross-region copy supported
+- Incremental  
+- Internally stored in S3  
+- Cross-region copy supported  
+- Cross-account sharing supported  
 
-Snapshots enable DR and backup strategy.
+Snapshots form the basis of many backup & restore DR patterns.
 
----
-
-# 5️⃣ Storage Gateway
-
-📘 Docs: https://docs.aws.amazon.com/storagegateway/
-
-Enables hybrid integration.
+> **EXAM TIP**  
+> EBS protects within an AZ.  
+> Regional protection requires snapshot copy.
 
 ---
 
-## Gateway Types
+# Amazon EFS (Managed NFS File System)
+
+**Documentation:**  
+https://docs.aws.amazon.com/efs/
+
+- Multi-AZ  
+- Linux-only  
+- POSIX compliant  
+- Auto-scaling  
+
+Commonly used for shared Linux workloads.
+
+---
+
+## Replication
+
+**Documentation:**  
+https://docs.aws.amazon.com/efs/latest/ug/efs-replication.html
+
+- Asynchronous cross-region replication  
+- RPO typically minutes  
+
+> **EXAM TIP**  
+> Shared Linux storage across instances → EFS.  
+> Windows workloads generally point elsewhere.
+
+---
+
+# Amazon FSx Family (Specialized File Systems)
+
+**Documentation:**  
+https://docs.aws.amazon.com/fsx/
+
+---
+
+## FSx for Windows File Server
+
+**Documentation:**  
+https://docs.aws.amazon.com/fsx/latest/WindowsGuide/
+
+- SMB protocol  
+- Active Directory required  
+- NTFS ACL support  
+
+Often selected for Windows-native applications.
+
+> **EXAM TIP**  
+> Windows + SMB + AD integration → FSx Windows.
+
+---
+
+## FSx for Lustre
+
+**Documentation:**  
+https://docs.aws.amazon.com/fsx/latest/LustreGuide/
+
+- High-performance  
+- POSIX compliant  
+- Native S3 integration  
+
+Common in HPC, ML, and analytics workloads.
+
+---
+
+## FSx for NetApp ONTAP
+
+**Documentation:**  
+https://docs.aws.amazon.com/fsx/latest/ONTAPGuide/
+
+- Multi-protocol support  
+- SnapMirror replication  
+- Hybrid-friendly  
+
+Often aligned with existing NetApp environments.
+
+---
+
+# Storage Gateway (Hybrid Integration)
+
+**Documentation:**  
+https://docs.aws.amazon.com/storagegateway/
+
+Enables on-premises integration with AWS storage.
 
 | Type | Purpose |
 |------|---------|
 | File Gateway | NFS/SMB → S3 |
 | Volume Gateway | Block interface backed by S3 |
-| Tape Gateway | Virtual tape library |
+| Tape Gateway | Virtual tape library replacement |
 
-Used in hybrid modernization.
+Typically seen in hybrid modernization scenarios.
 
 ---
 
-# 6️⃣ AWS DataSync
+# AWS DataSync (Migration Service)
 
-📘 Docs: https://docs.aws.amazon.com/datasync/
+**Documentation:**  
+https://docs.aws.amazon.com/datasync/
 
 Accelerated data transfer service.
 
 Supports:
 
-- NFS
-- SMB
-- S3
-- EFS
-- FSx
-- On-prem → AWS
-- AWS → AWS
+- NFS  
+- SMB  
+- S3  
+- EFS  
+- FSx  
 
-Optimized for file migration, not database replication.
+Optimized for file migration.
+
+> **EXAM TIP**  
+> File migration → DataSync.  
+> Database migration → DMS.
 
 ---
 
-# 7️⃣ Object vs File vs Block
+# Object vs File vs Block
 
 | Dimension | S3 | EFS | FSx | EBS |
 |------------|----|-----|-----|-----|
 | Storage Type | Object | File | File | Block |
-| Protocol | REST | NFS | SMB/NFS | Mounted volume |
+| Protocol | REST | NFS | SMB/NFS | Mounted |
 | Multi-AZ | Yes | Yes | Yes (varies) | No |
 | OS Support | Any | Linux | Windows/Linux | EC2 only |
-| Best For | Data lake, static content | Shared Linux storage | Specialized file workloads | Databases |
+| Typical Use | Data lake | Shared Linux | Enterprise file | Databases |
 
 ---
 
-# 8️⃣ Hybrid & Migration Patterns
+# Storage Selection Patterns
 
-| Scenario | Recommended Service |
-|-----------|---------------------|
+- Object storage scenarios often align with S3  
+- Shared Linux file storage commonly aligns with EFS  
+- Shared Windows file workloads typically align with FSx Windows  
+- High-performance analytics frequently align with FSx Lustre  
+- Enterprise NetApp environments often align with FSx ONTAP  
+- Database storage commonly aligns with EBS  
+- Archive requirements align with Glacier classes  
+- Cross-region DR aligns with replication or snapshot copy  
+- Hybrid file access aligns with Storage Gateway  
+
+> **EXAM TIP**  
+> Storage decisions are usually driven first by protocol (object, file, block), then by availability scope (AZ vs Region).
+
+---
+
+# Hybrid & Migration Patterns
+
+| Scenario | Typical Service |
+|-----------|----------------|
 | On-prem NFS → AWS | DataSync |
 | On-prem SMB → AWS | DataSync |
 | Hybrid file interface | Storage Gateway |
-| Massive offline migration | Snowball |
-| Database migration | DMS (not DataSync) |
+| Large offline migration | Snowball |
+| Database migration | DMS |
 
 ---
 
-# 9️⃣ Storage Selection Patterns
+# Common Storage Pitfalls
 
-- Shared Linux storage → EFS
-- Shared Windows storage → FSx Windows
-- HPC → FSx Lustre
-- NetApp hybrid → FSx ONTAP
-- Object storage → S3
-- Database volumes → EBS
-- Archive → Glacier classes
-- Cross-region DR → Replication or Snapshot copy
-
-Selection depends on:
-
-- Protocol
-- Latency
-- Multi-AZ scope
-- Cross-region requirements
-- OS compatibility
-- Hybrid integration
+- Assuming S3 resides inside a VPC  
+- Ignoring KMS key policy alignment  
+- Using EFS for Windows workloads  
+- Forgetting AD requirement for FSx Windows  
+- Expecting DataSync to migrate databases  
+- Confusing Glacier retrieval timelines  
+- Assuming EBS is multi-AZ  
+- Forgetting versioning for S3 replication  
+- Treating asynchronous replication as zero RPO  
 
 ---
+# Design Considerations
 
-# 🔟 Common Pitfalls
+When evaluating storage, considerations often include:
 
-- Assuming S3 is inside a VPC
-- Ignoring KMS key policy alignment
-- Using EFS for Windows workloads
-- Forgetting Active Directory for FSx Windows
-- Expecting DataSync to migrate databases
-- Confusing Glacier retrieval times
-- Assuming EBS is multi-AZ
-- Ignoring S3 prefix performance patterns
-- Forgetting versioning for S3 replication
+- Object vs file vs block model  
+- AZ-level vs cross-region protection  
+- Linux vs Windows workload  
+- Throughput vs IOPS characteristics  
+- DR expectations  
+- Hybrid integration needs  
+- Encryption scope and key management  
 
----
-
-# Architectural Lens
-
-Before choosing storage:
-
-1. Object vs file vs block?
-2. Multi-AZ required?
-3. Cross-region required?
-4. Linux or Windows workload?
-5. Throughput vs IOPS priority?
-6. Hybrid integration needed?
-7. Encryption scope?
-8. Recovery objective?
-
-Correct storage choice is almost always protocol + availability driven.
+In most scenarios, storage selection naturally aligns with protocol and availability requirements rather than service familiarity.

@@ -1,6 +1,6 @@
 # Edge & Global Services Notes (SAP-C02 Level)
 
-CloudFront • Global Accelerator • Route 53  
+CloudFront • Global Accelerator • Route 53
 
 These notes summarize architectural roles, performance characteristics, routing models, protocol layers, and global failover patterns across AWS edge and global services.
 
@@ -8,115 +8,145 @@ The emphasis is on understanding traffic flow, protocol behavior, caching models
 
 ---
 
-# 1️⃣ Amazon CloudFront
+# Amazon CloudFront
 
-📘 Official Documentation:  
+Documentation  
 https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html
 
-Amazon CloudFront is AWS’s global Content Delivery Network (CDN). It operates at **Layer 7 (HTTP/HTTPS)** and distributes content using global edge locations.
+Amazon CloudFront is AWS’s global content delivery network.
 
-## Core Characteristics
+It operates at the HTTP and HTTPS layer and distributes content using edge locations.
 
-- HTTP/HTTPS only
+Core characteristics:
+
+- HTTP and HTTPS only
 - Edge caching
-- Origin support (S3, ALB, API Gateway, EC2, custom origins)
-- TLS termination at edge
-- Integrated with AWS Shield and WAF
+- Supports origins such as S3, ALB, API Gateway, EC2, and custom origins
+- TLS termination at the edge
+- Integrates with Shield and WAF
 - Supports geo restriction
-- Signed URLs and signed cookies
-- Origin protection via OAC/OAI
+- Supports signed URLs and signed cookies
+- Supports origin protection using OAC or OAI
 
-CloudFront primarily optimizes web-based workloads and reduces origin load.
+CloudFront primarily improves performance for web-based workloads and reduces load on origins.
+
+> **EXAM TIP**  
+> HTTP caching and origin offload → CloudFront.
 
 ---
 
 ## Signed URLs vs Signed Cookies
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-signed-urls.html
 
 | Feature | Signed URL | Signed Cookie |
-|----------|------------|---------------|
+|--------|------------|---------------|
 | Restrict single object | Yes | Yes |
 | Restrict multiple objects | Less practical | Yes |
-| Best for | File downloads | Authenticated sessions |
-| Browser support | Yes | Yes |
+| Best For | Individual file access | Session-based access |
+| Browser Support | Yes | Yes |
 
-Signed URLs are typically used for controlled access to individual files.  
-Signed cookies are better suited for restricting access to multiple resources.
+Signed URLs are commonly used for individual protected downloads.
+
+Signed cookies are better suited for granting access to multiple protected resources in the same session.
 
 ---
 
 ## Origin Shield
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/origin-shield.html
 
 Origin Shield adds a centralized regional cache between edge locations and the origin.
 
-Benefits:
+Benefits include:
 
-- Improves cache hit ratio
-- Reduces origin load
-- Minimizes duplicate origin fetches
-- Useful for high-traffic global events
+- Improved cache hit ratio
+- Reduced origin load
+- Fewer duplicate origin fetches
+- Better protection during global traffic spikes
+
+Useful for large-scale global content delivery patterns.
 
 ---
 
 ## CloudFront Functions vs Lambda@Edge
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/cloudfront-functions.html  
 https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/lambda-at-the-edge.html
 
 | Feature | CloudFront Functions | Lambda@Edge |
-|----------|----------------------|--------------|
+|--------|----------------------|-------------|
 | Runtime | JavaScript | Node.js, Python |
-| Execution Time | Sub-millisecond | Up to seconds |
+| Execution Time | Very short | Longer |
 | Cost | Lower | Higher |
-| Use Case | Header rewrite, redirects | Auth, complex logic |
-| Execution Points | Viewer request/response | All request stages |
+| Best For | Header rewrite, redirects | Authentication, request validation |
+| Execution Points | Viewer request and response | Multiple request stages |
 
-CloudFront Functions are optimized for lightweight request manipulation at massive scale.  
-Lambda@Edge supports more advanced logic such as authentication or request validation.
+CloudFront Functions are optimized for lightweight high-scale request manipulation.
+
+Lambda@Edge supports more complex request and response logic.
+
+> **EXAM TIP**  
+> Lightweight header or URL manipulation → CloudFront Functions.  
+> Complex edge logic or auth → Lambda@Edge.
 
 ---
 
-# 2️⃣ AWS Global Accelerator
+# AWS Global Accelerator
 
-📘 Official Documentation:  
+Documentation  
 https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html
 
-AWS Global Accelerator operates at **Layer 4 (TCP/UDP)** and provides static Anycast IP addresses that route traffic across the AWS global backbone.
+AWS Global Accelerator provides static Anycast IP addresses and routes traffic across the AWS global network.
 
-## Core Characteristics
+It operates at Layer 4.
+
+Core characteristics:
 
 - Static Anycast IP addresses
-- Layer 4 routing (TCP/UDP)
-- Health-based routing
-- Rapid regional failover
+- TCP and UDP support
+- Health-based endpoint routing
+- Fast regional failover
 - No caching
-- Improves network path performance
+- Improved network path performance using the AWS backbone
 
-Global Accelerator is typically used when static IPs or non-HTTP acceleration are required.
+Global Accelerator is commonly used when static IPs or non-HTTP traffic acceleration is required.
+
+> **EXAM TIP**  
+> Static IPs or TCP/UDP global acceleration → Global Accelerator.
 
 ---
 
-# 3️⃣ Amazon Route 53
+# Amazon Route 53
 
-📘 Official Documentation:  
+Documentation  
 https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html
 
-Amazon Route 53 is a managed DNS service providing intelligent traffic routing.
+Amazon Route 53 is a managed DNS service with routing and health-check capabilities.
 
-Route 53 operates at the DNS layer and performs traffic steering, not traffic acceleration.
+It operates at the DNS layer.
+
+Core characteristics:
+
+- DNS-based traffic steering
+- Global domain resolution
+- Health-check based failover
+- Supports public and private hosted zones
+- Does not accelerate traffic itself
+
+Route 53 makes routing decisions before the client connects to the application endpoint.
 
 ---
 
 ## Routing Policies
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html
+
+Route 53 supports multiple routing policies:
 
 - Simple
 - Weighted
@@ -126,79 +156,93 @@ https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html
 - Geoproximity
 - Multi-value answer
 
-Routing policy selection depends on performance goals, traffic control requirements, or disaster recovery strategy.
+Routing policy choice depends on traffic steering objective, failover design, and regional distribution goals.
 
 ---
 
 ## Health Checks
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover.html
 
 Route 53 health checks can:
 
 - Monitor endpoints directly
 - Integrate with CloudWatch alarms
-- Trigger failover routing
+- Trigger DNS failover decisions
 
-Route 53 performs DNS-based routing decisions but does not optimize network paths.
+Route 53 performs DNS-level failover, not application-layer request routing.
+
+> **EXAM TIP**  
+> DNS-based failover or weighted routing → Route 53.
 
 ---
 
-# 4️⃣ CloudFront vs Global Accelerator vs Route 53
+# CloudFront vs Global Accelerator vs Route 53
 
 | Feature | CloudFront | Global Accelerator | Route 53 |
-|----------|------------|-------------------|----------|
-| Layer | 7 (HTTP/HTTPS) | 4 (TCP/UDP) | DNS |
+|--------|------------|-------------------|----------|
+| Layer | Layer 7 | Layer 4 | DNS |
 | Caching | Yes | No | No |
 | Static IPs | No | Yes | No |
-| Traffic Acceleration | Yes (Edge caching) | Yes (AWS backbone) | No |
-| Health Checks | Yes | Yes | Yes |
-| Protocol Support | HTTP/HTTPS only | TCP & UDP | DNS only |
-| DDoS Protection | Shield + WAF | Shield | Indirect |
+| Traffic Acceleration | Yes | Yes | No |
+| Health-Based Routing | Limited to origin behavior | Yes | Yes |
+| Protocol Support | HTTP and HTTPS only | TCP and UDP | DNS only |
+| DDoS Protection | Shield and WAF | Shield | Indirect |
+
+CloudFront focuses on HTTP acceleration and caching.
+
+Global Accelerator focuses on fast network path routing with static IPs.
+
+Route 53 focuses on DNS-level traffic steering.
 
 ---
 
-# 5️⃣ Architectural Selection Patterns
+# Architectural Selection Patterns
 
 Use CloudFront when:
 
-- You need HTTP caching
-- You want origin protection
-- You need geo restriction or signed access
-- You want edge TLS termination
+- HTTP caching is required
+- Origin load reduction is important
+- Geo restriction or signed access is needed
+- Edge TLS termination is beneficial
 
 Use Global Accelerator when:
 
-- You need static IP addresses
-- You require TCP/UDP acceleration
-- You need fast regional failover at Layer 4
+- Static IP addresses are required
+- TCP or UDP acceleration is needed
+- Fast regional failover is needed at Layer 4
 
 Use Route 53 when:
 
-- You need DNS-based routing
-- You require latency-based routing
-- You want active-passive or weighted traffic shifting
+- DNS-based routing is needed
+- Weighted or latency-based steering is required
+- Active-passive or DNS failover is needed
 
-These services often complement each other rather than replace one another.
+These services often complement each other rather than replace each other.
 
 ---
 
-# Common Pitfalls in Edge & Global Architectures
+# Common Pitfalls
 
-- Assuming CloudFront provides static IP addresses.
-- Using CloudFront for TCP/UDP workloads.
-- Expecting Global Accelerator to cache content.
-- Treating Route 53 as a traffic acceleration service.
-- Confusing DNS-level routing with application-layer failover.
-- Assuming CDN distribution equals multi-region disaster recovery.
+- Assuming CloudFront provides static IP addresses  
+- Using CloudFront for TCP or UDP workloads  
+- Expecting Global Accelerator to cache content  
+- Treating Route 53 as a traffic acceleration service  
+- Confusing DNS failover with application-layer failover  
+- Assuming CDN usage alone provides multi-region disaster recovery  
 
-Architectural clarity usually comes from asking:
+---
 
-- Is caching required?
-- Is the workload HTTP-based?
-- Are static IP addresses mandatory?
-- Is performance optimization needed at Layer 4 or Layer 7?
-- Is the goal routing, acceleration, or failover?
+# Design Considerations
 
-Understanding these dimensions typically makes the appropriate service selection clear.
+Edge and global service selection usually becomes clearer when evaluated across:
+
+- Whether caching is required
+- Whether the workload is HTTP-based or protocol-agnostic
+- Whether static IP addresses are mandatory
+- Whether optimization is needed at Layer 4, Layer 7, or DNS layer
+- Whether the primary goal is routing, acceleration, or failover
+
+The right choice usually comes from identifying where traffic decisions should occur and whether the workload benefits from caching, network acceleration, or DNS steering.
+

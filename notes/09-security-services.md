@@ -8,9 +8,9 @@ The focus is on understanding service roles, scope boundaries, and how detection
 
 ---
 
-# 1️⃣ Amazon GuardDuty
+# Amazon GuardDuty
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html
 
 GuardDuty provides continuous threat detection across AWS accounts and workloads.
@@ -24,7 +24,7 @@ It analyzes:
 - S3 data events (optional)
 - RDS login activity (optional)
 
-## Detects
+GuardDuty detects:
 
 - Compromised EC2 instances
 - Stolen IAM credentials
@@ -39,63 +39,70 @@ GuardDuty:
 - Is agentless
 - Does not block traffic
 - Generates findings
-- Integrates with Security Hub, EventBridge, and automation workflows
+- Integrates with Security Hub and EventBridge
 
-It is a **detection service**, not a prevention service.
+It is a detection service, not a prevention service.
+
+> **EXAM TIP**  
+> GuardDuty detects threats but does not block them.
 
 ---
 
-# 2️⃣ Amazon Macie
+# Amazon Macie
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html
 
 Macie discovers and classifies sensitive data stored in Amazon S3.
 
-## Detects
+It identifies:
 
 - Personally Identifiable Information (PII)
-- Financial data
+- Financial information
 - Credentials
 - API keys
 - Sensitive logs
 
-Macie:
+Macie characteristics:
 
 - Operates only on S3
 - Performs classification and risk scoring
-- Does not encrypt or remediate automatically
+- Generates findings for data exposure
 
-It is focused on **data security posture**, not runtime security.
+Macie focuses on data security posture rather than runtime security.
+
+> **EXAM TIP**  
+> Sensitive data discovery in S3 → Macie.
 
 ---
 
-# 3️⃣ Amazon Inspector
+# Amazon Inspector
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/inspector/latest/user/what-is-inspector.html
 
 Inspector provides automated vulnerability management.
 
-## Scans
+Inspector scans:
 
-- EC2 instances (software vulnerabilities)
-- ECR container images (CVE detection)
-- Lambda functions (dependency vulnerabilities)
+- EC2 instances for software vulnerabilities
+- ECR container images for CVEs
+- Lambda dependencies
 
-Inspector:
+Inspector characteristics:
 
-- Relies on SSM agent for EC2 scanning
-- Continuously evaluates new CVEs
-- Focuses on vulnerability detection, not anomaly detection
+- Uses SSM agent for EC2 scanning
+- Continuously evaluates newly discovered CVEs
+- Focuses on vulnerability detection
 
-Inspector answers: *“Is this workload vulnerable?”*
+Inspector answers the question:  
+Is this workload vulnerable?
 
 ---
 
-# 4️⃣ Amazon Detective
+# Amazon Detective
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/detective/latest/userguide/what-is-detective.html
 
 Detective supports post-incident investigation.
@@ -105,7 +112,7 @@ It builds graph-based relationships across:
 - CloudTrail logs
 - VPC Flow Logs
 - GuardDuty findings
-- IAM activity patterns
+- IAM activity
 
 Detective enables:
 
@@ -113,16 +120,21 @@ Detective enables:
 - Entity behavior analysis
 - Root cause investigation
 
-Detective is investigative, not preventative.
+Detective is investigative rather than preventative.
+
+> **EXAM TIP**  
+> Security investigation and root cause analysis → Detective.
 
 ---
 
-# 5️⃣ AWS Security Hub
+# AWS Security Hub
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html
 
-Security Hub aggregates findings from:
+Security Hub aggregates findings from multiple AWS security services.
+
+It integrates with:
 
 - GuardDuty
 - Inspector
@@ -130,26 +142,29 @@ Security Hub aggregates findings from:
 - IAM Access Analyzer
 - AWS Foundational Security Best Practices
 - CIS benchmarks
-- PCI controls
+- PCI DSS controls
 
 Security Hub:
 
 - Centralizes security posture visibility
-- Normalizes findings into a common format
+- Normalizes findings
 - Supports cross-account aggregation
 
-It does not perform scanning itself.
+Security Hub does not perform scanning itself.
+
+> **EXAM TIP**  
+> Centralized security findings across accounts → Security Hub.
 
 ---
 
-# 6️⃣ AWS WAF
+# AWS WAF
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/waf/latest/developerguide/waf-chapter.html
 
-AWS WAF protects HTTP/HTTPS workloads at **Layer 7**.
+AWS WAF protects HTTP and HTTPS workloads at the application layer.
 
-## Protects Against
+It protects against:
 
 - SQL injection
 - Cross-site scripting (XSS)
@@ -157,57 +172,57 @@ AWS WAF protects HTTP/HTTPS workloads at **Layer 7**.
 - Rate-based abuse
 - Geographic filtering
 
-## Integrations
+WAF integrates with:
 
 - CloudFront
 - Application Load Balancer
 - API Gateway
 - AppSync
 
-WAF performs application-layer filtering.
+WAF performs application-layer request filtering.
 
 ---
 
-# 7️⃣ AWS Shield
+# AWS Shield
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/waf/latest/developerguide/shield-chapter.html
 
-Shield provides DDoS protection at **Layer 3/4**.
+Shield provides protection against distributed denial-of-service attacks.
 
-## Shield Standard
+Shield Standard:
 
 - Automatically enabled
-- Protects against common network attacks
+- Protects against common network-layer attacks
 
-## Shield Advanced
+Shield Advanced:
 
 - Enhanced detection
-- 24/7 DDoS Response Team
-- Cost protection during DDoS events
+- Access to DDoS Response Team
+- Cost protection during attacks
 
-Shield mitigates volumetric attacks.
+Shield mitigates volumetric network attacks.
 
 ---
 
-## WAF vs Shield Comparison
+## WAF vs Shield
 
 | Dimension | WAF | Shield |
-|------------|------|--------|
+|-----------|-----|--------|
 | OSI Layer | Layer 7 | Layer 3/4 |
-| Protects Against | App-layer attacks | DDoS attacks |
+| Protects Against | Application attacks | Network DDoS |
 | HTTP Filtering | Yes | No |
-| Rate Limiting | Yes | Infrastructure-level |
+| Rate Limiting | Yes | Infrastructure level |
 | Cost Protection | No | Yes (Advanced) |
 
-WAF filters malicious requests.  
-Shield protects against volumetric DDoS.
+WAF filters malicious HTTP requests.  
+Shield mitigates volumetric DDoS attacks.
 
 ---
 
-# 8️⃣ IAM Access Analyzer
+# IAM Access Analyzer
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html
 
 IAM Access Analyzer detects unintended external access.
@@ -228,119 +243,157 @@ It identifies:
 - Cross-account access
 - External principal trust relationships
 
-It does not automatically block access.
+Access Analyzer highlights exposure but does not block access automatically.
+
+> **EXAM TIP**  
+> Detect unintended public or cross-account access → Access Analyzer.
 
 ---
 
-# 9️⃣ AWS CloudTrail
+# AWS CloudTrail
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html
 
 CloudTrail records API activity across AWS services.
 
-## Key Considerations
+Key architectural considerations:
 
 - Enable multi-region trails
-- Use Organization Trail for centralized logging
-- CloudTrail Lake supports SQL-based log analysis
+- Use organization trails for centralized logging
+- CloudTrail Lake supports SQL analysis
 
-CloudTrail provides audit visibility but does not detect threats independently.
+CloudTrail provides audit visibility.
 
-It is a data source for GuardDuty and Detective.
+It is often used as a data source for:
+
+- GuardDuty
+- Detective
+- Security analysis workflows
+
+> **EXAM TIP**  
+> CloudTrail records activity but does not detect threats itself.
 
 ---
 
-# 🔟 AWS KMS (Key Management Service)
+# AWS KMS
 
-📘 Docs:  
+Documentation  
 https://docs.aws.amazon.com/kms/latest/developerguide/overview.html
 
-KMS manages encryption keys for AWS services.
+KMS manages encryption keys used by AWS services.
 
-## Key Types
+Key types:
 
 - AWS-managed keys
-- Customer-managed keys (CMKs)
-- Custom key stores (CloudHSM-backed)
+- Customer-managed keys
+- Custom key stores backed by CloudHSM
 
-## Permission Model
+KMS permission model includes:
 
 - IAM policies
 - Key policies
 - Grants
 
-Key policies must allow access even if IAM allows it.
+Key policies are authoritative.
 
 KMS keys are region-scoped.
 
-Automatic rotation:
+Automatic rotation is available for supported customer-managed symmetric keys.
 
-- Available for supported customer-managed symmetric keys (yearly)
+> **EXAM TIP**  
+> Even if IAM allows access, the key policy must also permit it.
 
 ---
 
-# 1️⃣1️⃣ Security Services Comparison
+# Security Service Roles
 
 ## Detection vs Investigation vs Aggregation
 
 | Service | Detection | Investigation | Aggregation |
-|-----------|------------|--------------|-------------|
+|--------|-----------|--------------|-------------|
 | GuardDuty | Yes | No | No |
-| Macie | Yes (Data classification) | No | No |
-| Inspector | Yes (Vulnerabilities) | No | No |
+| Macie | Yes | No | No |
+| Inspector | Yes | No | No |
 | Detective | No | Yes | No |
 | Security Hub | No | No | Yes |
 
 ---
 
-## Data vs Runtime vs Network Protection
+## Security Focus Areas
 
-| Service | Focus Area |
-|-----------|------------|
+| Service | Primary Focus |
+|--------|---------------|
+| GuardDuty | Behavioral threat detection |
 | Macie | Sensitive data discovery |
 | Inspector | Vulnerability management |
-| GuardDuty | Behavioral threat detection |
 | Detective | Incident investigation |
-| WAF | Application-layer filtering |
-| Shield | Network-layer DDoS mitigation |
+| WAF | Application-layer protection |
+| Shield | Network-layer DDoS protection |
+| CloudTrail | API audit logging |
 | KMS | Encryption key management |
-| CloudTrail | Audit logging |
 
 ---
 
-# 1️⃣2️⃣ Layered Security Model
+# Layered Security Model
 
-Security services operate in layers:
+AWS security services operate across layers.
 
-1. **Preventive Controls** – IAM, SCPs, WAF, Shield
-2. **Detective Controls** – GuardDuty, Inspector, Macie
-3. **Investigative Controls** – Detective
-4. **Aggregation & Governance** – Security Hub
-5. **Audit & Visibility** – CloudTrail
-6. **Encryption & Key Control** – KMS
+Preventive controls include:
 
-Understanding these layers clarifies how services complement one another.
+- IAM
+- Service Control Policies
+- WAF
+- Shield
+
+Detective controls include:
+
+- GuardDuty
+- Inspector
+- Macie
+
+Investigative tools include:
+
+- Detective
+
+Aggregation and governance layer:
+
+- Security Hub
+
+Audit and visibility layer:
+
+- CloudTrail
+
+Encryption and key management layer:
+
+- KMS
+
+Understanding these layers clarifies how security services complement each other.
 
 ---
 
-# Common Pitfalls in Security Architecture
+# Common Pitfalls
 
-- Expecting GuardDuty to block attacks.
-- Assuming Security Hub performs scanning.
-- Confusing vulnerability scanning (Inspector) with behavioral detection (GuardDuty).
-- Using WAF when volumetric DDoS protection is required.
-- Treating CloudTrail as real-time threat detection.
-- Assuming Macie scans services beyond S3.
-- Overlooking GuardDuty + Detective integration.
-- Forgetting KMS key policy requirements.
-- Assuming Shield protects against application-layer exploits.
+- Expecting GuardDuty to block attacks  
+- Assuming Security Hub performs vulnerability scanning  
+- Confusing vulnerability scanning with behavioral detection  
+- Using WAF when DDoS protection is required  
+- Treating CloudTrail as a threat detection system  
+- Assuming Macie scans services beyond S3  
+- Forgetting GuardDuty and Detective integration  
+- Ignoring KMS key policy requirements  
+- Assuming Shield protects against application-layer exploits  
 
-Security decisions become clearer when asking:
+---
 
-- Is the goal detection, prevention, investigation, or aggregation?
-- Is the protection needed at network or application layer?
-- Is the concern data exposure or runtime compromise?
-- Is centralized multi-account visibility required?
+# Design Considerations
 
-Understanding these dimensions clarifies how AWS security services interact in layered architectures.
+Security architecture decisions typically align with:
+
+- Whether the goal is prevention, detection, investigation, or aggregation  
+- Whether protection is needed at network or application layer  
+- Whether the concern is data exposure or runtime compromise  
+- Whether centralized multi-account visibility is required  
+- Whether encryption control must be customer-managed  
+
+Clarity usually comes from identifying the security layer where protection or visibility is required.

@@ -10,7 +10,7 @@ These notes consolidate core AWS networking constructs, hybrid architectures, ro
 
 ## VPC Peering
 
-**AWS Documentation:**  
+**Documentation:**  
 https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html  
 
 VPC Peering provides private connectivity between two VPCs.
@@ -30,11 +30,15 @@ VPC Peering provides private connectivity between two VPCs.
 - Simple connectivity  
 - Low operational complexity  
 
+> **EXAM TIP**  
+> VPC Peering is **not transitive** and does not scale well in large multi-account enterprises.  
+> Enterprise-wide connectivity → Think **Transit Gateway**.
+
 ---
 
 ## Transit Gateway (TGW)
 
-**AWS Documentation:**  
+**Documentation:**  
 https://docs.aws.amazon.com/vpc/latest/tgw/what-is-transit-gateway.html  
 
 Transit Gateway acts as a scalable hub for VPC and hybrid connectivity.
@@ -47,24 +51,31 @@ Transit Gateway acts as a scalable hub for VPC and hybrid connectivity.
 - Multiple route tables (segmentation capability)  
 - High throughput  
 
+> **EXAM TIP**  
+> Many VPCs + Hybrid connectivity + Central control → **Transit Gateway**.
+
 ---
 
 ## TGW Route Table Mechanics
 
-**AWS Documentation:**  
+**Documentation:**  
 https://docs.aws.amazon.com/vpc/latest/tgw/tgw-route-tables.html  
 
 Two separate controls exist:
 
 ### Association
-- Each attachment must be associated with exactly one TGW route table.
-- Determines which routing domain the attachment uses.
+- Each attachment must be associated with exactly one TGW route table  
+- Determines which routing domain the attachment uses  
 
 ### Propagation
-- Attachments can propagate routes into one or more TGW route tables.
-- Missing propagation causes silent traffic drops.
+- Attachments can propagate routes into one or more TGW route tables  
+- Missing propagation causes silent traffic drops  
 
-Blackhole routes in TGW drop traffic without explicit logging.
+Blackhole routes drop traffic without explicit logging.
+
+> **EXAM TIP**  
+> Association ≠ Propagation.  
+> Missing propagation → Traffic silently fails.
 
 ---
 
@@ -85,37 +96,40 @@ Blackhole routes in TGW drop traffic without explicit logging.
 
 ## Internet Gateway (IGW)
 
-**AWS Documentation:**  
+**Documentation:**  
 https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html  
 
 - Enables internet access for public subnets  
-- Requires public IP or Elastic IP  
-- Route: `0.0.0.0/0 → IGW`  
+- Requires public or Elastic IP  
+- Route: `0.0.0.0/0 → IGW`
 
 ---
 
 ## NAT Gateway
 
-**AWS Documentation:**  
+**Documentation:**  
 https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html  
 
 - Enables private subnets to access internet  
 - Required for:
-  - Public AWS endpoints (STS, etc.)
-  - Cross-account S3 access without interface endpoint
+  - Public AWS endpoints (STS, etc.)  
   - External APIs  
-- Deployed per AZ for high availability  
+- Deploy per AZ for high availability  
+
+> **EXAM TIP**  
+> Private subnet + No NAT + No VPC Endpoint →  
+> STS / public API calls will fail.
 
 ---
 
-## VPC Endpoints
+# VPC Endpoints
 
 **Overview Documentation:**  
 https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints.html  
 
 ---
 
-### Gateway Endpoint
+## Gateway Endpoint
 
 **Documentation:**  
 https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html  
@@ -123,12 +137,15 @@ https://docs.aws.amazon.com/vpc/latest/privatelink/gateway-endpoints.html
 - Only for S3 and DynamoDB  
 - Free  
 - Route-table based  
-- Same-account S3 access  
 - No security groups  
+
+> **EXAM TIP**  
+> Gateway Endpoint alone does **not** solve cross-account S3 access.  
+> IAM + bucket policy still required.
 
 ---
 
-### Interface Endpoint (PrivateLink)
+## Interface Endpoint (PrivateLink)
 
 **Documentation:**  
 https://docs.aws.amazon.com/vpc/latest/privatelink/what-is-privatelink.html  
@@ -153,36 +170,32 @@ https://docs.aws.amazon.com/vpc/latest/privatelink/what-is-privatelink.html
 
 ---
 
-# PrivateLink (Service Exposure Pattern)
-
-**AWS Documentation:**  
-https://docs.aws.amazon.com/vpc/latest/privatelink/what-is-privatelink.html  
+## PrivateLink (Service Exposure Pattern)
 
 PrivateLink enables private service consumption across VPCs or accounts.
 
+### Key Characteristics
+
+- Supports overlapping CIDRs  
+- Not transitive  
+- Requires endpoint creation in every consumer VPC  
+- Cannot be forwarded via TGW or peering  
+
+> **EXAM TIP**  
+> Overlapping CIDR + Private service exposure → **PrivateLink**.  
+> Requires **Network Load Balancer (NLB)** on provider side.
+
 ---
 
-## Architecture Model
+### PrivateLink Structural Requirements
 
-### Service Provider VPC
-
+#### Service Provider VPC
 - Network Load Balancer (required)  
 - VPC Endpoint Service  
 
-**Endpoint Service Documentation:**  
-https://docs.aws.amazon.com/vpc/latest/privatelink/create-endpoint-service.html  
-
-### Consumer VPC
-
+#### Consumer VPC
 - Interface Endpoint  
 - Security groups control access  
-
-PrivateLink:
-
-- Supports overlapping CIDRs  
-- Is not transitive  
-- Requires endpoint creation in every consumer VPC  
-- Cannot be forwarded via TGW or peering  
 
 ---
 
@@ -190,7 +203,7 @@ PrivateLink:
 
 ## Site-to-Site VPN
 
-**AWS Documentation:**  
+**Documentation:**  
 https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html  
 
 - Encrypted  
@@ -199,7 +212,6 @@ https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html
 - Route propagation required in VPC/TGW route tables  
 
 Used for:
-
 - Fast hybrid setup  
 - Backup to Direct Connect  
 
@@ -207,45 +219,21 @@ Used for:
 
 ## Direct Connect (DX)
 
-**AWS Documentation:**  
+**Documentation:**  
 https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html  
 
 Provides dedicated connectivity between on-prem and AWS.
-
----
-
-### Virtual Interface Types
-
-**Documentation:**  
-https://docs.aws.amazon.com/directconnect/latest/UserGuide/WorkingWithVirtualInterfaces.html  
-
-| Type | Purpose |
-|------|--------|
-| Private VIF | VPC connectivity |
-| Public VIF | Public AWS services |
-| Transit VIF | TGW connectivity |
-
----
 
 ### Characteristics
 
 - Not encrypted by default  
 - Predictable latency  
 - High throughput  
-- Can combine with VPN for encryption and failover  
 
----
-
-## DX + VPN Hybrid Pattern
-
-**Hybrid Connectivity Whitepaper:**  
-https://docs.aws.amazon.com/whitepapers/latest/aws-vpc-connectivity-options/hybrid-connectivity.html  
-
-Common enterprise design:
-
-- DX for primary connectivity  
-- VPN attached to same TGW  
-- Automatic failover via BGP route priority  
+> **EXAM TIP**  
+> DX = **NOT encrypted**  
+> VPN = **Encrypted**  
+> DX + VPN together = Recommended hybrid resilience pattern.
 
 ---
 
@@ -255,10 +243,10 @@ When multiple hybrid paths exist (DX + VPN):
 
 - Traffic may enter via DX  
 - Return via VPN or IGW  
+- Stateful firewalls may drop return traffic  
 
-Stateful firewalls may drop return traffic.
-
-Ensure routing symmetry when designing hybrid failover.
+> **EXAM TIP**  
+> Hybrid failover requires routing symmetry validation.
 
 ---
 
@@ -273,11 +261,13 @@ Enterprise pattern:
 
 - TGW routes traffic through inspection VPC  
 - AWS Network Firewall performs L3/L7 inspection  
-- Used for segmentation and compliance  
 
-Flow:
-
+Flow:  
 VPC → TGW → Inspection VPC → TGW → Destination  
+
+> **EXAM TIP**  
+> Centralized egress inspection → Route `0.0.0.0/0` via inspection VPC.  
+> Avoid NAT in every VPC.
 
 ---
 
@@ -287,9 +277,11 @@ VPC → TGW → Inspection VPC → TGW → Destination
 https://docs.aws.amazon.com/vpc/latest/tgw/tgw-peering.html  
 
 - Connects Transit Gateways across regions  
-- Enables global hub architecture  
 - Not transitive across multiple peered TGWs  
 - Requires routing configuration on both sides  
+
+> **EXAM TIP**  
+> TGW peering is **not globally transitive**.
 
 ---
 
@@ -302,7 +294,6 @@ https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html
 
 | Policy | Use Case |
 |--------|----------|
-| Simple | Single record |
 | Weighted | Gradual traffic shifting |
 | Latency | Lowest RTT region |
 | Geolocation | Country-based routing |
@@ -310,7 +301,11 @@ https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html
 | Failover | Active-passive |
 | Multi-value | Health-checked round robin |
 
-Failover routing requires health checks unless using supported ALIAS targets (e.g., ALB, CloudFront).
+Failover routing requires health checks unless using ALIAS targets.
+
+> **EXAM TIP**  
+> Route 53 = DNS routing only.  
+> Does **not** accelerate traffic.
 
 ---
 
@@ -322,10 +317,12 @@ https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resolver.html
 To resolve private hosted zones from on-prem:
 
 - Create inbound resolver endpoint in VPC  
-- Forward DNS queries from on-prem to inbound endpoint  
+- Forward DNS queries from on-prem  
 - Use outbound endpoint for AWS → on-prem resolution  
 
-Private hosted zones resolve only inside associated VPCs unless resolver endpoints are configured.
+> **EXAM TIP**  
+> Private hosted zones are **not automatically resolvable** from on-prem.  
+> Resolver endpoints are required.
 
 ---
 
@@ -333,20 +330,14 @@ Private hosted zones resolve only inside associated VPCs unless resolver endpoin
 
 ## Security Groups vs NACL
 
-**Security Groups Documentation:**  
-https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html  
-
-**NACL Documentation:**  
-https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html  
-
 | Feature | Security Group | NACL |
 |----------|---------------|------|
 | Stateful | Yes | No |
 | Applied To | ENI | Subnet |
-| Default Action | Deny | Allow |
 | Return Traffic | Automatic | Must allow explicitly |
 
-Unexpected return traffic issues often involve NACL configuration.
+> **EXAM TIP**  
+> Unexpected return traffic issues → Often NACL misconfiguration.
 
 ---
 
@@ -360,11 +351,13 @@ https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelera
 | Feature | Route 53 | Global Accelerator |
 |----------|----------|-------------------|
 | Type | DNS-based | Anycast static IP |
-| Failover | DNS update | Immediate |
+| Failover | TTL-based | Immediate |
 | Path | Internet | AWS backbone |
-| Use Case | Regional routing | Fast failover + static IP |
+| Use Case | Regional routing | Fast L4 failover + static IP |
 
-Global Accelerator provides static anycast IPs and faster regional failover for TCP/UDP workloads.
+> **EXAM TIP**  
+> Need static IP + fast L4 failover → Global Accelerator.  
+> Need DNS-based regional routing → Route 53.
 
 ---
 
@@ -380,3 +373,5 @@ Global Accelerator provides static anycast IPs and faster regional failover for 
 - Using gateway endpoint expecting cross-account S3 support  
 - Misunderstanding Route 53 latency vs geolocation routing  
 - Forgetting PrivateLink requires NLB on provider side  
+
+---
