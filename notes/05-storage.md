@@ -31,15 +31,15 @@ S3 is AWS’s foundational object storage service.
 | Standard-IA | Infrequent | 30-day minimum |
 | One Zone-IA | Non-critical | Single AZ |
 | Intelligent-Tiering | Unknown pattern | Auto tiering |
-| Glacier Instant | Archive + fast retrieval | Millisecond restore |
-| Glacier Flexible | Archive | Minutes–hours restore |
-| Glacier Deep Archive | Long-term archive | 12–48 hr restore |
+| S3 Glacier Instant Retrieval | Archive + fast retrieval | Millisecond restore |
+| S3 Glacier Flexible Retrieval | Archive | Minutes–hours restore |
+| S3 Glacier Deep Archive | Long-term archive | 12–48 hr restore |
 
 Selection typically reflects access frequency and recovery time expectations.
 
-> **EXAM TIP**  
-> Archive + fast restore → Glacier Instant.  
-> Very long-term archive → Deep Archive.
+> **EXAM TIP**
+> Archive + fast restore → S3 Glacier Instant Retrieval.
+> Very long-term archive → S3 Glacier Deep Archive.
 
 ---
 
@@ -256,6 +256,7 @@ Optimized for file migration.
 - Enterprise NetApp environments often align with FSx ONTAP  
 - Database storage commonly aligns with EBS  
 - Archive requirements align with Glacier classes  
+ - Archive requirements align with S3 Glacier classes  
 - Cross-region DR aligns with replication or snapshot copy  
 - Hybrid file access aligns with Storage Gateway  
 

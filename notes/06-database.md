@@ -129,13 +129,19 @@ Used for read scaling and DR.
 https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html  
 
 - Connection pooling  
-- Handles failover more gracefully  
+- Connection reuse 
+- Failover transparency  
 - Reduces connection exhaustion  
+- Protection against connection storms (especially Lambda)
 
-Common in Lambda, ECS, and EKS architectures.
+RDS Proxy acts as an intermediary connection pool between applications and the database.
+
+During Multi-AZ failover, RDS Proxy automatically reconnects to the newly promoted primary instance.  
+This reduces application-level connection failures and avoids reconnect storms during failover events.
+RDS Proxy is particularly useful for serverless architectures where large numbers of short-lived connections (for example from Lambda) can overwhelm database connection limits.
 
 > **EXAM TIP**  
-> High concurrent connections (serverless) → RDS Proxy.
+> Lambda or highly concurrent workloads causing database connection exhaustion → RDS Proxy.
 
 ---
 
@@ -167,11 +173,16 @@ Partition distribution depends on:
 - Item size  
 - Partition key design  
 
-Hot partitions can cause throttling.
+Hot partitions can cause throttling when a single partition key receives disproportionate traffic.<br>
+DynamoDB can temporarily absorb spikes using burst capacity, which accumulates unused throughput for up to 300 seconds.<br>
+Sustained uneven traffic distribution may still lead to throttling even when overall table capacity appears sufficient.
 
 > **EXAM TIP**  
 > Scaling issue in DynamoDB?  
 > Often partition key design.
+> Short traffic spikes may succeed due to DynamoDB burst capacity.  
+> Sustained hot partitions still cause throttling even if table capacity appears adequate.  
+> On-Demand mode simplifies scaling but trades cost for operational simplicity.
 
 ---
 
@@ -278,7 +289,7 @@ Common for caching, sessions, distributed locking.
 **Documentation:**  
 https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.html  
 
-- Continuous backups (PITR)  
+- Continuous backups - point-in-time recovery (PITR)  
 - On-demand backups  
 - Restore creates new table  
 
@@ -288,36 +299,87 @@ https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeReco
 
 ## RDS vs Aurora
 
-| Feature | RDS | Aurora |
-|----------|------|--------|
-| Storage | EBS-backed | Distributed |
-| Read Replicas | Yes | Yes (up to 15) |
-| Cross-Region DR | Read replica | Aurora Global |
-| Failover Speed | Minutes | Faster |
-| Throughput | Engine dependent | Higher |
+| Dimension | RDS | Aurora |
+|-----------|-----|--------|
+| Storage | EBS-backed | Distributed storage across AZs |
+| Read Replicas | Yes | Up to 15 |
+| Cross-region DR | Read replica | Aurora Global |
+| Failover Speed | Minutes | Typically faster |
+| Performance | Engine dependent | Higher throughput |
+| Operational Complexity | Lower | Slightly higher |
+| Cost | Lower baseline | Higher baseline |
+
+When to choose RDS over Aurora:
+
+- Cost-sensitive workloads
+- Smaller applications
+- Standard relational workloads
+- When advanced Aurora features are unnecessary
+
+When to choose Aurora over RDS:
+
+- High read scaling required
+- Faster failover required
+- Multi-region DR with low RPO
+- High throughput OLTP workloads
 
 ---
 
 ## Aurora Global vs RDS Cross-Region
 
-| Feature | Aurora Global | RDS Cross-Region |
-|----------|----------------|-----------------|
-| Replication Lag | <1 sec typical | Seconds–minutes |
-| Failover | Faster | Manual |
+| Dimension | Aurora Global Database | RDS Cross-Region Read Replica |
+|-----------|------------------------|-------------------------------|
+| Replication Method | Storage-level replication | Engine-level replication |
+| Replication Lag | Typically < 1 second | Seconds to minutes |
+| Failover Speed | Faster regional failover | Manual promotion required |
 | RPO | Near zero | Higher |
 | RTO | Lower | Higher |
+| Write Capability | Single writer region | Read-only replica until promoted |
+| Complexity | Higher architecture complexity | Simpler setup |
+| Supported Engines | Aurora only | Multiple engines |
 
+When to choose Aurora Global:
+
+- Very low RPO (<1 sec) required
+- Fast regional disaster recovery
+- Global read scaling required 
+- Latency-sensitive global applications 
+- Mission-critical relational workloads
+
+When to choose RDS Cross-Region Read Replicas:
+
+- Moderate DR requirements 
+- Replication lag of seconds is acceptable 
+- Simpler architecture preferred 
+- Cost-sensitive environments 
+- Non-Aurora database engines
+
+In many architectures, Aurora Global is selected for resilience, while RDS replicas are used for cost-efficient DR.
 ---
 
-## Relational vs DynamoDB
+## Aurora vs DynamoDB
 
-| Feature | RDS / Aurora | DynamoDB |
-|----------|---------------|------------|
-| Data Model | Relational | Key-value |
+| Dimension | Aurora | DynamoDB |
+|-----------|--------|----------|
+| Data Model | Relational | Key-value / document |
 | Joins | Supported | Not supported |
 | Scaling | Vertical + replicas | Horizontal automatic |
 | Transactions | Full ACID | Limited ACID |
-| Global Writes | Complex | Native |
+| Global Writes | Complex | Native via Global Tables |
+| Latency | Milliseconds | Single-digit milliseconds |
+
+When to choose DynamoDB:
+
+- Massive scale workloads
+- Unpredictable traffic
+- Serverless architectures
+- Key-value access patterns
+
+When to choose Aurora:
+
+- Complex relational queries
+- Transaction-heavy systems
+- Applications requiring joins
 
 ---
 
@@ -329,7 +391,7 @@ https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeReco
 - Expecting DAX to reduce write capacity  
 - Using Redis as primary durable store  
 - Forgetting eventual consistency in Global Tables  
-- Not enabling PITR for critical workloads  
+- Not enabling point-in-time recovery (PITR) for critical workloads  
 - Ignoring connection scaling limits without RDS Proxy  
 
 ---

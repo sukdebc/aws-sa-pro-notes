@@ -94,6 +94,8 @@ Trust policy is not required in this case.
 
 Lambda invocation requires a resource-based policy.
 
+CloudWatch Logs doesn't require it, but SNS/SQS/S3 do. This distinction matters in exam scenarios
+
 > **EXAM TIP**  
 > Lambda invoke permission = Resource policy.  
 > Not trust policy.
@@ -183,16 +185,18 @@ Applied at:
 SCP:
 - Defines maximum allowed actions  
 - Cannot grant permissions  
-- Affects all identities (including root in member accounts)  
+- SCPs **apply** to all IAM identities in member accounts, including the **root user**.
 - Explicit Deny overrides all  
 
 SCP does not apply to:
+- The management account root user
 - Resource policies directly  
 - External accounts outside the organization  
 
 > **EXAM TIP**  
 > Admin role blocked?  
-> Very often → SCP.
+> Very often → SCP. 
+> Explicit denies in SCPs override all IAM permissions, including the root user of member accounts. 
 
 ---
 
@@ -212,18 +216,6 @@ Session policies:
 
 > **EXAM TIP**  
 > “Admin role but access denied” → Check session policy.
-
----
-
-## Role Chaining
-
-When assuming a role from another assumed role:
-- Maximum session duration = 1 hour  
-
-Even if target role allows longer duration.
-
-> **EXAM TIP**  
-> Role chaining always caps session at 1 hour.
 
 ---
 

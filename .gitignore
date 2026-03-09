@@ -1,0 +1,11 @@
+# Ignore macOS metadata
+.DS_Store
+
+# Local docsify artifacts
+index.html
+_sidebar.md
+
+# Node artifacts (if ever created locally)
+node_modules/
+package-lock.json
+package.json

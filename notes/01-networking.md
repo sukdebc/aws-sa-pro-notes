@@ -168,6 +168,10 @@ https://docs.aws.amazon.com/vpc/latest/privatelink/what-is-privatelink.html
 | Security Groups | No | Yes |
 | Transitive | No | No |
 
+
+- Interface Endpoint behavior across regions: Endpoints are regional and NOT transitive through peering or TGW.
+- Gateway endpoints can be used by services in the same account, but cross-account requires endpoint policy + IAM policy layering.
+
 ---
 
 ## PrivateLink (Service Exposure Pattern)
@@ -301,11 +305,19 @@ https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html
 | Failover | Active-passive |
 | Multi-value | Health-checked round robin |
 
-Failover routing requires health checks unless using ALIAS targets.
+Failover routing requires health checks.
+
+**Exception**: ALIAS records pointing to AWS resources (such as ALB, CloudFront, or S3 static websites) can use **Evaluate Target Health**, allowing Route 53 to infer health from the underlying AWS service.
+
+When routing to external endpoints or non-AWS targets, explicit Route 53 health checks must be configured.
+
 
 > **EXAM TIP**  
 > Route 53 = DNS routing only.  
 > Does **not** accelerate traffic.
+> Route 53 failover normally requires health checks.  
+> ALIAS records to AWS resources can rely on **Evaluate Target Health** instead.
+> CloudFront distribution → no health check required
 
 ---
 

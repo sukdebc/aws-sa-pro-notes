@@ -40,7 +40,7 @@ While the official exam blueprint is documented separately, the notes themselves
 - [Networking](notes/01-networking.md)
 - [IAM](notes/02-iam.md)
 - [Governance & Organizations](notes/03-governance.md)
-- [Security Services](notes/09-security.md)
+ - [Security Services](notes/09-security-services.md)
 
 ### Compute & Application Layers
 - [Compute & Auto Scaling](notes/08-compute.md)
@@ -54,9 +54,10 @@ While the official exam blueprint is documented separately, the notes themselves
 - [Analytics](notes/12-analytics.md)
 
 ### Reliability & Global Design
-- [Resilience Patterns](notes/07-resiliency.md)
-- [Disaster Recovery](notes/04-dr.md)
-- [Edge & Global Services](notes/15-edge.md)
+- [Resilience Patterns](notes/07-resilience.md)
+- [Disaster Recovery](notes/04-disaster-recovery.md)
+- [Edge & Global Services](notes/15-edge-global.md)
+
 
 ### Migration & Modernization
 - [Migration Strategies](notes/14-migration.md)
