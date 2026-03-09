@@ -3,7 +3,6 @@
 ![AWS Certified Solutions Architect – Professional](https://img.shields.io/badge/AWS-Certified%20Solutions%20Architect%20–%20Professional-232F3E?logo=amazonaws&logoColor=white)
 
 Recertified as **AWS Certified Solutions Architect – Professional** toward the end of 2025.
-
 These notes were organized primarily for my own structured revision and are shared here in case they are useful to others preparing for the exam.
 
 ---
@@ -15,10 +14,9 @@ This repository contains:
 - Condensed architectural reference notes  
 - Patterns and trade-off summaries  
 - Service comparison highlights  
-- Scenario-oriented observations  
-- Personal preparation reflections  
+- Scenario-oriented observations   
 
-Given this was a recertification, the material emphasizes reinforcing architectural decision patterns rather than documenting services comprehensively.
+As this was a recertification, the material emphasizes reinforcing architectural decision patterns rather than documenting services comprehensively.
 
 This is not a brain dump or a collection of exam questions.  
 The focus is on architectural reasoning, trade-offs, and system-level thinking.
@@ -35,12 +33,15 @@ While the official exam blueprint is documented separately, the notes themselves
 ---
 
 ## Notes Index
+For a blueprint-aligned view of how these topics map to exam domains:
+
+👉 **[Exam Domains Overview](exam_domains_overview.md)**
 
 ### Architecture Foundations
 - [Networking](notes/01-networking.md)
 - [IAM](notes/02-iam.md)
 - [Governance & Organizations](notes/03-governance.md)
- - [Security Services](notes/09-security-services.md)
+- [Security Services](notes/09-security-services.md)
 
 ### Compute & Application Layers
 - [Compute & Auto Scaling](notes/08-compute.md)
@@ -59,16 +60,13 @@ While the official exam blueprint is documented separately, the notes themselves
 - [Edge & Global Services](notes/15-edge-global.md)
 
 
-### 
 ### Migration & Modernization
 - [Migration Strategies](notes/14-migration.md)
 
-### Some extra ref
+### Exam Preparation Aids
 - [Decision Trees (architecture heuristics)](notes/16-decision-trees.md)
-
-For a blueprint-aligned view of how these topics map to exam domains:
-
-👉 **[Exam Domains Overview](exam_domains_overview.md)**
+- [Common Exam Scenario Patterns](17-exam-patterns.md)
+- [Common Exam Traps](17-exam-patterns.md#common-exam-traps)
 
 ---
 
@@ -92,7 +90,7 @@ Practice exams (Whizlabs and Tutorials Dojo) were useful primarily for reviewing
 
 AI tools were used to help structure and refine portions of the material efficiently.
 
-The content has been reviewed and adjusted to the best of my understanding and practical experience.
+The content has been reviewed and adjusted based on my understanding and practical experience.
 
 ---
 
