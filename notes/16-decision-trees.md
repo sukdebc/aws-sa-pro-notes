@@ -137,24 +137,35 @@ flowchart TD
 ```mermaid
 flowchart TD
 
-  A[Start: Define RTO and RPO requirements] --> B{RTO seconds or near zero RPO}
-  B -->|Yes| C[Active Active Multi Region - Aurora Global or DynamoDB Global Tables]
+  A[Start: Define RTO and RPO requirements] --> B{RTO seconds or near-zero RPO}
 
-  B -->|No| D{RTO minutes}
-  D -->|Yes| E[Warm Standby - scaled down environment always running]
+  B -->|Yes| C{Primary data model}
 
-  D -->|No| F{RTO tens of minutes}
-  F -->|Yes| G[Pilot Light - core services running scale on failover]
+  C -->|Relational| D[Aurora Global Database<br/>Single writer, multi-region hot standby]
 
-  F -->|No| H[Backup and Restore - snapshots and cross region backups]
+  C -->|NoSQL| E{Need multi-region writes}
+
+  E -->|Yes| F[DynamoDB Global Tables<br/>Multi-active multi-region writes<br/>Last-writer-wins conflict resolution]
+
+  E -->|No| G[Single-region DynamoDB<br/>Use DR pattern based on recovery target]
+
+  B -->|No| H{RTO minutes}
+
+  H -->|Yes| I[Warm Standby<br/>Scaled-down environment always running]
+
+  H -->|No| J{RTO tens of minutes}
+
+  J -->|Yes| K[Pilot Light<br/>Core services running, scale on failover]
+
+  J -->|No| L[Backup & Restore<br/>Snapshots and cross-region backups]
 
   %% Styles
   style A fill:#cce5ff,stroke:#004085,stroke-width:2px
   classDef decision fill:#ffe5cc,stroke:#cc7000,stroke-width:2px
   classDef service fill:#d4edda,stroke:#155724,stroke-width:2px
 
-  class B,D,F decision
-  class C,E,G,H service
+  class B,C,E,H,J decision
+  class D,F,G,I,K,L service
 
 ```
 
@@ -188,7 +199,7 @@ flowchart TD
 
   G --> L{Need storage across AZs or instances}
   L -->|Single instance in one AZ| M[EBS standard usage]
-  L -->|High availability required| N[Use replication at application layer - example RDS Multi AZ]
+  L -->|High availability required| N[Use managed service replication - example RDS Multi AZ or Aurora cross-AZ replication]
 
   N --> O{Need cross region durability}
   O -->|Yes| P[EBS snapshot copy or service replication]
