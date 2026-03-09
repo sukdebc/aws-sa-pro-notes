@@ -22,6 +22,32 @@ This is not a brain dump or a collection of exam questions.
 The focus is on architectural reasoning, trade-offs, and system-level thinking.
 
 ---
+## How to Use These Notes
+
+These notes were primarily organized for structured revision.  
+They can be used in different ways depending on the stage of preparation.
+
+### Core Review
+Notes **01–15** cover the main architectural topics.  
+They are organized by theme and focus on trade-offs and architectural reasoning rather than exhaustive service documentation.
+
+### Decision Support
+The **[Decision Trees](notes/16-decision-trees.md)** provide quick heuristics for common architecture choices and can be useful when reviewing scenario-based questions.
+
+### Pattern Recognition
+The **[Common Exam Scenario Patterns](notes/17-exam-patterns.md)** summarize recurring signals often seen in exam questions, while **[Common Exam Traps](notes/17-exam-patterns.md#common-exam-traps)** highlight common misconceptions.
+
+### Quick Review
+Before the exam, revisiting the **Exam Traps** section can help refresh common pitfalls and architectural distinctions.
+
+### Example Practice Loop
+A simple study flow that worked well during preparation:
+
+1. Review the relevant topic notes  
+2. Attempt practice questions  
+3. Validate reasoning using the decision trees  
+4. Revisit exam traps for misunderstood concepts
+---
 
 ## Repository Structure
 
@@ -65,24 +91,24 @@ For a blueprint-aligned view of how these topics map to exam domains:
 
 ### Exam Preparation Aids
 - [Decision Trees (architecture heuristics)](notes/16-decision-trees.md)
-- [Common Exam Scenario Patterns](17-exam-patterns.md)
-- [Common Exam Traps](17-exam-patterns.md#common-exam-traps)
+- [Common Exam Scenario Patterns](notes/17-exam-patterns.md)
+- [Common Exam Traps](notes/17-exam-patterns.md#common-exam-traps)
 
 ---
 
 ## Preparation Approach
 
-For this recertification, the emphasis was on reinforcing architectural depth rather than memorizing individual service features.
+For this recertification, the focus was on reinforcing architectural depth rather than memorizing individual service features.
 
 Areas revisited more thoroughly included:
 
 - Networking and hybrid connectivity  
-- Multi-account design patterns  
-- Disaster recovery strategies (RTO/RPO alignment)  
+- Multi-account architecture patterns  
+- Disaster recovery strategies and RTO/RPO alignment  
 - Governance models (IAM, SCPs, Organizations)  
 - Data consistency and resilience patterns  
 
-Practice exams (Whizlabs and Tutorials Dojo) were useful primarily for reviewing explanation logic and refining decision-making under constraints.
+Practice exams (Whizlabs and Tutorials Dojo) were mainly used to review explanation logic and refine architectural decision-making under constraints.
 
 ---
 
