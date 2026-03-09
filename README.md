@@ -4,7 +4,7 @@
 
 Recertified as **AWS Certified Solutions Architect – Professional** toward the end of 2025.
 
-These notes were organized primarily for structured revision and are shared here in case they are useful to colleagues or others preparing for the exam.
+These notes were organized primarily for my own structured revision and are shared here in case they are useful to others preparing for the exam.
 
 ---
 
@@ -59,8 +59,12 @@ While the official exam blueprint is documented separately, the notes themselves
 - [Edge & Global Services](notes/15-edge-global.md)
 
 
+### 
 ### Migration & Modernization
 - [Migration Strategies](notes/14-migration.md)
+
+### Some extra ref
+- [Decision Trees (architecture heuristics)](notes/16-decision-trees.md)
 
 For a blueprint-aligned view of how these topics map to exam domains:
 
