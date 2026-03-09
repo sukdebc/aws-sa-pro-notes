@@ -23,11 +23,11 @@ Use as quick heuristics only. Final choices should always align with workload no
 flowchart TD
 
   %% Nodes
-  A[Need network connectivity] --> B{Is on-premises involved}
+  A[Need network connectivity] --> B{On premises involved}
 
-  B -->|Yes| C{Traffic characteristics}
-  C -->|High throughput predictable traffic| D[Direct Connect]
-  C -->|Quick setup or lower bandwidth| E[Site-to-Site VPN]
+  B -->|Yes| C{Traffic type}
+  C -->|High throughput predictable| D[Direct Connect]
+  C -->|Quick setup or low bandwidth| E[Site to Site VPN]
 
   D --> F{Multiple VPCs}
   F -->|Yes| G[Direct Connect Gateway plus Transit Gateway]
@@ -37,17 +37,17 @@ flowchart TD
   I -->|Yes| J[VPN plus Transit Gateway]
   I -->|No| K[VPN plus Virtual Private Gateway]
 
-  B -->|No — AWS only| L{Need connectivity between VPCs}
+  B -->|No AWS only| L{Need VPC to VPC connectivity}
 
   L -->|Yes| M{Number of VPCs}
-  M -->|Two VPCs (simple)| N[VPC Peering]
-  M -->|Many VPCs (hub-and-spoke)| O[Transit Gateway]
+  M -->|Two VPCs simple| N[VPC Peering]
+  M -->|Many VPCs hub spoke| O[Transit Gateway]
 
-  O --> P{Cross-region connectivity}
+  O --> P{Cross region needed}
   P -->|Yes| Q[TGW Peering]
   P -->|No| R[Regional TGW routing]
 
-  L -->|No — service exposure only| S{Expose service privately}
+  L -->|No service exposure only| S{Expose service privately}
   S -->|Yes| T[PrivateLink via NLB plus Interface Endpoint]
   S -->|No| U{Access AWS services privately}
 
@@ -57,12 +57,14 @@ flowchart TD
 
   %% Styles
   style A fill:#cce5ff,stroke:#004085,stroke-width:2px
+
   classDef decision fill:#ffe5cc,stroke:#cc7000,stroke-width:2px
   classDef service fill:#d4edda,stroke:#155724,stroke-width:2px
   classDef neutral fill:#e2e3e5,stroke:#6c757d,stroke-width:2px
 
-  class B,C,F,I,L,M,O,P,S,U,V decision
+  class B,C,F,I,L,M,P,S,U,V decision
   class D,E,G,H,J,K,N,O,Q,R,T,W,X service
+
 ```
 
 ## Decision checklist
