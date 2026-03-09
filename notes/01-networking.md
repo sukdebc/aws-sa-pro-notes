@@ -35,6 +35,29 @@ VPC Peering provides private connectivity between two VPCs.
 > Enterprise-wide connectivity → Think **Transit Gateway**.
 
 ---
+## VPC Sharing (AWS RAM)
+
+**Documentation:**  
+https://docs.aws.amazon.com/vpc/latest/userguide/vpc-sharing.html
+
+VPC Sharing allows multiple AWS accounts to deploy resources into subnets of a centrally managed VPC.
+
+- Implemented using **AWS Resource Access Manager (RAM)**
+- Subnets are shared with participant accounts
+- Networking components (route tables, gateways, security groups ownership) remain controlled by the VPC owner
+- Participant accounts can launch resources (EC2, RDS, Lambda, etc.) into shared subnets
+
+### Typical Use Case
+
+Used by centralized platform or networking teams to manage VPC architecture while allowing application teams in other accounts to deploy workloads.
+
+### Design Considerations
+
+- Simplifies multi-account network management
+- Avoids the need for VPC peering or Transit Gateway in tightly coupled environments
+- Works best when accounts belong to the same organization
+- Participants cannot modify core networking configuration
+---
 
 ## Transit Gateway (TGW)
 

@@ -177,6 +177,71 @@ Route 53 performs DNS-level failover, not application-layer request routing.
 > DNS-based failover or weighted routing → Route 53.
 
 ---
+## AWS Infrastructure Extensions (Outposts & Local Zones)
+
+These services extend AWS infrastructure closer to workloads that cannot run entirely inside standard AWS regions.
+
+---
+
+### AWS Outposts
+
+**Documentation:**  
+https://docs.aws.amazon.com/outposts/latest/userguide/what-is-outposts.html
+
+AWS Outposts brings AWS-managed infrastructure into on-premises data centers.
+
+Key characteristics:
+
+- Fully managed AWS hardware installed on-prem
+- Uses same APIs, tools, and services as AWS regions
+- Integrates with the parent AWS region
+- Supports services such as EC2, EBS, RDS
+
+Typical use cases:
+
+- Low-latency hybrid workloads
+- Regulatory or data residency requirements
+- Local data processing with AWS control plane
+
+Outposts is primarily used for **hybrid cloud architectures**.
+
+---
+
+### AWS Local Zones
+
+**Documentation:**  
+https://docs.aws.amazon.com/local-zones/latest/userguide/what-is-aws-local-zones.html
+
+Local Zones extend AWS regions into metropolitan areas to provide low-latency access.
+
+Key characteristics:
+
+- Located near major population centers
+- Provide **single-digit millisecond latency**
+- Support services such as EC2, EBS, ECS, and ALB
+- Connected to a parent AWS region
+
+Typical use cases:
+
+- Real-time gaming
+- media and content creation
+- live streaming
+- ultra-low-latency applications
+
+Local Zones are designed for **latency-sensitive workloads near users**.
+
+---
+
+### Edge vs Local Zones vs Outposts
+
+| Service | Purpose |
+|---|---|
+| CloudFront | Content delivery and caching |
+| Global Accelerator | Network path optimization |
+| Route53 | DNS routing |
+| Local Zones | Low-latency compute near users |
+| Outposts | AWS infrastructure in on-prem data centers |
+---
 
 # CloudFront vs Global Accelerator vs Route 53
 

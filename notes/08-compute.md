@@ -370,6 +370,66 @@ NLB:
 ELB health checks integrate with Auto Scaling for replacement automation.
 
 ---
+## Configuration Management (AppConfig & Parameter Store)
+
+**Documentation**
+
+- AWS AppConfig  
+https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html
+
+- AWS Systems Manager Parameter Store  
+https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
+
+
+### AWS AppConfig
+
+AppConfig enables dynamic configuration updates without redeploying applications.
+
+Typical capabilities:
+
+- Feature flags
+- Gradual configuration rollout
+- A/B testing
+- Region-specific configuration
+- Automatic rollback if configuration causes failures
+
+Often used with:
+
+- Lambda
+- ECS / EKS
+- Microservices architectures
+
+
+### SSM Parameter Store
+
+Parameter Store provides centralized storage for configuration values and secrets.
+
+Capabilities:
+
+- Hierarchical configuration storage
+- SecureString encryption via KMS
+- Versioning
+- Integration with IAM
+- Native integration with EC2, Lambda, and containers
+
+Often used for:
+
+- application configuration
+- environment variables
+- database connection strings
+- API endpoints
+
+
+### AppConfig vs Parameter Store
+
+| Feature | AppConfig | Parameter Store |
+|---|---|---|
+| Dynamic rollout | Yes | No |
+| Feature flags | Yes | No |
+| Configuration storage | Uses Parameter Store / S3 | Native |
+| Deployment strategies | Yes | No |
+| Typical use | Feature management | Config storage |
+---
 
 # Common Compute Themes in SAP-C02
 

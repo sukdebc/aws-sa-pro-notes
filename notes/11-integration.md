@@ -194,14 +194,13 @@ API Gateway is commonly used with Lambda, Step Functions, or SQS in serverless a
 | Feature | SNS | SQS | EventBridge |
 |--------|------|------|-------------|
 | Communication Model | Push | Pull | Push |
-| Primary Role | Broadcast | Buffering | Event routing |
-| Message Retention | No durable storage | 1 minute to 14 days | 24 hours default |
+| Primary Role | Broadcast / fan-out | Buffering and decoupling | Event routing (event bus) |
+| Message Retention | No durable storage | 1 minute to 14 days | 24 hours default on event bus |
 | Ordering | No | FIFO supported | No |
-| Replay | No | No native replay | Archive and replay |
-| Filtering | Subscription filtering | None | Advanced JSON filtering |
-| Cross Account | Limited | Yes | Native support |
+| Replay | No | No native replay | Archive and replay (requires archive) |
+| Filtering | Subscription filtering | None | Advanced JSON pattern filtering |
+| Cross-Account | Supported (via policies) | Supported | Native event bus routing |
 | DLQ Support | Via SQS | Native | Native |
-
 ---
 
 # Service Combination Patterns

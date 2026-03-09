@@ -335,6 +335,33 @@ Effective permission is always the intersection.
 Understanding this layered model is critical for complex SAP-C02 governance scenarios.
 
 ---
+## CloudFormation StackSets
+
+**Documentation:**  
+https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html
+
+CloudFormation StackSets allow infrastructure templates to be deployed across multiple AWS accounts and regions from a central management account.
+
+- Enables centralized Infrastructure as Code in multi-account environments
+- Often used with **AWS Organizations**
+- Supports **automatic deployment to new accounts in an OU**
+- Can operate using **service-managed permissions**
+
+### Typical Use Cases
+
+- Deploy baseline infrastructure across accounts
+- Standardized IAM roles and guardrail resources
+- Organization-wide logging, monitoring, or networking components
+
+### Governance Context
+
+StackSets complement governance controls:
+
+- **SCPs** → restrict what actions accounts can perform
+- **StackSets** → deploy compliant infrastructure across accounts
+
+Together they help enforce consistent organizational architecture.
+---
 
 # Comparison Summary
 
