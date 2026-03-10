@@ -229,6 +229,7 @@ flowchart TD
 flowchart TD
 
   A[Start: Workload type] --> B{Event driven or short lived tasks}
+
   B -->|Yes| C{Execution typically under 15 minutes}
   C -->|Yes| D[Lambda]
   C -->|No| E[Fargate or EC2 containers]
@@ -237,7 +238,7 @@ flowchart TD
   F -->|Yes| G[Lambda with Provisioned Concurrency]
   F -->|No| H[Standard Lambda]
 
-  A -->|No| I{Workload packaged as containers}
+  B -->|No| I{Workload packaged as containers}
   I -->|Yes| J{Need Kubernetes ecosystem or portability}
   J -->|Yes| K[EKS]
   J -->|No| L[ECS]
@@ -252,7 +253,7 @@ flowchart TD
 
   I -->|No| S{Traditional application or OS control needed}
   S -->|Yes| T[EC2 Auto Scaling Groups]
-  S -->|Simplified platform deployment| U[Elastic Beanstalk]
+  S -->|No| U[Elastic Beanstalk]
 
   T --> V{Large scale batch jobs}
   V -->|Yes| W[AWS Batch]
@@ -284,8 +285,8 @@ flowchart TD
 ```mermaid
 flowchart TD
 
-  A[Start: What messaging pattern is required] --> B{High throughput ordered event stream}
-  B -->|Yes| C[Kinesis Data Streams or MSK]
+  A[Start: What messaging pattern is required] --> B{High-throughput streaming or ordered event stream}
+  B -->|Yes| C[Kinesis Data Streams or MSK - Managed Streaming for Apache Kafka]
 
   B -->|No| D{Do multiple independent consumers need the same event}
   D -->|Yes| E[SNS fan out to SQS queues per consumer]
@@ -297,10 +298,10 @@ flowchart TD
   H -->|Yes| I[SQS FIFO]
   H -->|No| J[SQS Standard]
 
-  F -->|No| K{Need content based routing or event bus}
+  F -->|No| K{Need content-based routing, event bus, or SaaS integration}
   K -->|Yes| L[EventBridge]
 
-  K -->|No| M[Direct invocation - Lambda or Step Functions]
+  K -->|No| M[Direct service invocation<br/>Lambda or Step Functions]
 
   %% Styles
   style A fill:#cce5ff,stroke:#004085,stroke-width:2px
@@ -313,7 +314,7 @@ flowchart TD
 ```
 
 ## Decision checklist
-- **Kinesis / MSK** → high-throughput, ordered event streams.
+- **Kinesis / MSK (Managed Streaming for Apache Kafka)** → high-throughput, ordered event streams.
 - **SNS → SQS fan-out** → multiple independent consumers need the same event.
 - **SQS** → durable buffering and backpressure.
 - **SQS FIFO** → strict ordering requirements.
