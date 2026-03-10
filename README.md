@@ -27,7 +27,13 @@ The focus is on architectural reasoning, trade-offs, and system-level thinking.
 These notes were primarily organized for structured revision.  
 They can be used in different ways depending on the stage of preparation.
 
-### Core Review
+### Understanding SAP-C02 Domains
+The exam is organized into 4 domains with specific weightings and test patterns.  
+Start here to understand the exam structure:
+
+👉 **[Exam Domains Overview](exam_domains_overview.md)** – Blueprint summary, domain interpretation, and what each domain tests.
+
+### Primary Notes
 Notes **01–15** cover the main architectural topics.  
 They are organized by theme and focus on trade-offs and architectural reasoning rather than exhaustive service documentation.
 
@@ -59,9 +65,6 @@ While the official exam blueprint is documented separately, the notes themselves
 ---
 
 ## Notes Index
-For a blueprint-aligned view of how these topics map to exam domains:
-
-👉 **[Exam Domains Overview](exam_domains_overview.md)**
 
 ### Architecture Foundations
 - [Networking](notes/01-networking.md)
