@@ -1,4 +1,4 @@
-# AWS Analytics Notes (SAP-C02 Level)
+# AWS Analytics Notes
 
 Kinesis • MSK • Glue • EMR • Athena • Redshift • Lake Formation • OpenSearch
 

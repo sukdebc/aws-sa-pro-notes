@@ -1,4 +1,4 @@
-# AWS IAM Notes (SAP-C02 Level)
+# AWS IAM Notes
 
 IAM • STS • SCP • Permission Boundaries • Cross-Account Access • KMS • Session Policies • IRSA • Access Analyzer
 

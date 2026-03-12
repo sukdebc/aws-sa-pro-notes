@@ -1,4 +1,4 @@
-# Multi-Region & Disaster Recovery Notes (SAP-C02 Level)
+# Multi-Region & Disaster Recovery Notes
 
 These notes summarize disaster recovery strategies, regional failover models, replication patterns, automation considerations, and global architecture trade-offs across AWS services.
 

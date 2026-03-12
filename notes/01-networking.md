@@ -1,4 +1,4 @@
-# AWS Networking Notes (SAP-C02 Level)
+# AWS Networking Notes
 
 VPC Peering • Transit Gateway • Direct Connect • VPN • PrivateLink • Route 53 • Hybrid DNS • Endpoints • Inspection Patterns • Global Connectivity
 
@@ -84,21 +84,41 @@ Transit Gateway acts as a scalable hub for VPC and hybrid connectivity.
 **Documentation:**  
 https://docs.aws.amazon.com/vpc/latest/tgw/tgw-route-tables.html  
 
-Two separate controls exist:
+Transit Gateway route tables use two independent controls that define how traffic is routed across attachments.
 
 ### Association
-- Each attachment must be associated with exactly one TGW route table  
+- Each attachment must be associated with exactly **one** TGW route table  
 - Determines which routing domain the attachment uses  
 
+Example attachments:
+- VPC attachment (application VPC)  
+- Site-to-Site VPN attachment  
+- Direct Connect gateway attachment  
+- Peering attachment to another Transit Gateway  
+
+Only the **associated route table** is used to determine how traffic from that attachment is routed.
+
 ### Propagation
-- Attachments can propagate routes into one or more TGW route tables  
-- Missing propagation causes silent traffic drops  
+- Attachments can **propagate routes** into one or more TGW route tables  
+- Propagation advertises the attachment’s CIDR into those route tables  
+
+Example:
+- A VPC attachment can propagate its VPC CIDR  
+- A VPN attachment can propagate on-prem routes via BGP  
+
+If propagation is not enabled (or a static route is not created), the route will not appear in the TGW route table and traffic will fail.
+
+### Blackhole Routes
+- Explicit TGW route table entries that drop matching traffic  
+- Useful for blocking unwanted routes or isolating networks  
 
 Blackhole routes drop traffic without explicit logging.
 
 > **EXAM TIP**  
 > Association ≠ Propagation.  
-> Missing propagation → Traffic silently fails.
+> Association chooses the routing table used by an attachment.  
+> Propagation controls which routes appear in that routing table.  
+> Missing propagation → traffic silently fails.
 
 ---
 
@@ -191,9 +211,9 @@ https://docs.aws.amazon.com/vpc/latest/privatelink/what-is-privatelink.html
 | Security Groups | No | Yes |
 | Transitive | No | No |
 
+- Interface endpoints are regional resources and cannot be accessed across regions or through Transit Gateway. They can be accessed over VPC peering if DNS resolution and security groups permit it.
 
-- Interface Endpoint behavior across regions: Endpoints are regional and NOT transitive through peering or TGW.
-- Gateway endpoints can be used by services in the same account, but cross-account requires endpoint policy + IAM policy layering.
+- Gateway endpoints (S3 and DynamoDB) are VPC-scoped and available to any resource within that VPC. Access control is enforced through IAM policies and resource policies (such as S3 bucket policies). Endpoint policies can optionally add further restrictions.
 
 ---
 

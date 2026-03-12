@@ -1,4 +1,4 @@
-# AWS Storage Notes (SAP-C02 Level)
+# AWS Storage Notes
 
 S3 • EFS • FSx • EBS • Storage Gateway • DataSync
 

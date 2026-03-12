@@ -1,4 +1,4 @@
-# AWS Database Notes (SAP-C02 Level)
+# AWS Database Notes
 
 Aurora • RDS • DynamoDB • ElastiCache
 

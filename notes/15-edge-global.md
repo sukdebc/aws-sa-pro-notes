@@ -1,4 +1,4 @@
-# Edge & Global Services Notes (SAP-C02 Level)
+# Edge & Global Services Notes
 
 CloudFront • Global Accelerator • Route 53
 

@@ -1,4 +1,4 @@
-# Governance, Organizations & SCP Notes (SAP-C02 Level)
+# Governance, Organizations & SCP Notes
 
 AWS Organizations • Service Control Policies • Permission Boundaries • CloudTrail • Config • Control Tower • Access Analyzer
 
@@ -14,7 +14,7 @@ The emphasis is on:
 
 ---
 
-# 1️⃣ Service Control Policies (SCPs)
+# Service Control Policies (SCPs)
 
 **Documentation:**  
 https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html
@@ -76,7 +76,7 @@ SCPs are typically used for **guardrails**, not granular access control.
 
 ---
 
-# 2️⃣ Permission Boundaries
+# Permission Boundaries
 
 **Documentation:**  
 https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html
@@ -89,8 +89,9 @@ They define the **maximum permissions an identity policy can grant**.
 
 ## Evaluation Model
 
-Effective permissions = `SCP ∩ Permission Boundary ∩ Identity Policy ∩ Session Policy ∩ Resource Policy`
+Effective permissions =  
 
+`SCP ∩ Permission Boundary ∩ Identity Policy ∩ Session Policy ∩ Resource Policy`
 
 Permission boundaries:
 
@@ -116,7 +117,7 @@ Delegated role creation:
 
 ---
 
-# 3️⃣ AWS Organizations
+# AWS Organizations
 
 **Documentation:**  
 https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html
@@ -165,7 +166,7 @@ Security services (GuardDuty, Config, Security Hub, Access Analyzer) can be cent
 
 ---
 
-# 4️⃣ CloudTrail (Organization Trail)
+# CloudTrail (Organization Trail)
 
 **Documentation:**  
 https://docs.aws.amazon.com/awscloudtrail/latest/userguide/creating-trail-organization.html
@@ -200,7 +201,7 @@ CloudTrail feeds:
 
 ---
 
-# 5️⃣ Tag Policies
+# Tag Policies
 
 **Documentation:**  
 https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_tag-policies.html
@@ -213,7 +214,7 @@ They define:
 - Allowed tag values  
 - Case enforcement  
 
-They do not automatically remediate resources.
+Tag Policies validate tags but do not enforce or remediate resources automatically.
 
 Automation via Config + Lambda/SSM is required for enforcement.
 
@@ -225,7 +226,7 @@ Automation via Config + Lambda/SSM is required for enforcement.
 
 ---
 
-# 6️⃣ AWS Config
+# AWS Config
 
 **Documentation:**  
 https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html
@@ -262,7 +263,7 @@ Used for:
 
 ---
 
-# 7️⃣ IAM Access Analyzer (Organization Scope)
+# IAM Access Analyzer (Organization Scope)
 
 **Documentation:**  
 https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html
@@ -288,13 +289,12 @@ Can operate at account or organization level.
 
 ---
 
-# 8️⃣ AWS Control Tower
+# AWS Control Tower
 
 **Documentation:**  
 https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html
 
-Control Tower builds on Organizations and Config to provide structured landing zones.
-
+Control Tower automates the creation of a secure multi-account landing zone built on AWS Organizations, Config, and Service Catalog.
 ---
 
 ## Guardrail Types
@@ -320,7 +320,7 @@ Control Tower builds on Organizations and Config to provide structured landing z
 
 ---
 
-# 9️⃣ Effective Permission Evaluation Model
+# Effective Permission Evaluation Model
 
 Layered evaluation:
 
@@ -335,32 +335,38 @@ Effective permission is always the intersection.
 Understanding this layered model is critical for complex SAP-C02 governance scenarios.
 
 ---
-## CloudFormation StackSets
+
+# CloudFormation StackSets
 
 **Documentation:**  
 https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/what-is-cfnstacksets.html
 
 CloudFormation StackSets allow infrastructure templates to be deployed across multiple AWS accounts and regions from a central management account.
 
-- Enables centralized Infrastructure as Code in multi-account environments
-- Often used with **AWS Organizations**
-- Supports **automatic deployment to new accounts in an OU**
+- Enables centralized Infrastructure as Code in multi-account environments  
+- Often used with **AWS Organizations**  
+- Supports **automatic deployment to new accounts in an OU**  
 - Can operate using **service-managed permissions**
 
-### Typical Use Cases
+---
 
-- Deploy baseline infrastructure across accounts
-- Standardized IAM roles and guardrail resources
-- Organization-wide logging, monitoring, or networking components
+## Typical Use Cases
 
-### Governance Context
+- Deploy baseline infrastructure across accounts  
+- Standardized IAM roles and guardrail resources  
+- Organization-wide logging, monitoring, or networking components  
+
+---
+
+## Governance Context
 
 StackSets complement governance controls:
 
-- **SCPs** → restrict what actions accounts can perform
-- **StackSets** → deploy compliant infrastructure across accounts
+- **SCPs** → restrict what actions accounts can perform  
+- **StackSets** → deploy compliant infrastructure across accounts  
 
 Together they help enforce consistent organizational architecture.
+
 ---
 
 # Comparison Summary
@@ -378,7 +384,7 @@ Together they help enforce consistent organizational architecture.
 
 ---
 
-# Governance Tool Roles
+# Governance Tools
 
 | Tool | Primary Function |
 |-------|------------------|
@@ -406,6 +412,7 @@ Together they help enforce consistent organizational architecture.
 - Misunderstanding layered permission intersection logic  
 
 ---
+
 # Design Considerations
 
 Governance decisions become clearer when evaluated across:
@@ -418,4 +425,3 @@ Governance decisions become clearer when evaluated across:
 - Blast radius containment  
 
 Enterprise governance in AWS is fundamentally about layered control — not single policies.
-

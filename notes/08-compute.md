@@ -1,4 +1,4 @@
-# Compute, Auto Scaling & Spot Notes (SAP-C02 Level)
+# Compute, Auto Scaling & Spot Notes
 
 EC2 • Auto Scaling • Spot • Placement Groups • Savings Plans • Capacity Rebalancing • Lifecycle Hooks • Instance Refresh • Capacity Reservations
 

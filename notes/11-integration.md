@@ -1,4 +1,4 @@
-# Application Integration Notes (SAP-C02 Level)
+# Application Integration Notes
 
 SNS • SQS • EventBridge • Step Functions • API Gateway
 

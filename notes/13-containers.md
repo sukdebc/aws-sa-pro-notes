@@ -1,4 +1,4 @@
-# AWS Containers Notes (SAP-C02 Level)
+# AWS Containers Notes
 
 ECS • EKS • Fargate • Container Networking • IAM for Containers • Scaling • Storage • Service Mesh • Security
 

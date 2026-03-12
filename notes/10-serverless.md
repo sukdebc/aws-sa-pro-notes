@@ -1,4 +1,4 @@
-# AWS Serverless Architecture Notes (SAP-C02 Level)
+# AWS Serverless Architecture Notes
 
 Lambda • API Gateway • SQS • SNS • EventBridge • Step Functions
 

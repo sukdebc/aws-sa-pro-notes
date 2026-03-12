@@ -1,4 +1,4 @@
-# Resilience & High Availability Patterns (SAP-C02 Level)
+# Resilience & High Availability Patterns
 
 This document brings together compute, database, networking, storage, and serverless patterns into practical resilience architectures.
 

@@ -1,4 +1,4 @@
-# AWS Security Services Notes (SAP-C02 Level)
+# AWS Security Services Notes
 
 GuardDuty • Macie • Inspector • Detective • Security Hub • WAF • Shield • IAM Access Analyzer • CloudTrail • KMS
 

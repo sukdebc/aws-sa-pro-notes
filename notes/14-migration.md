@@ -1,4 +1,4 @@
-# AWS Migration Notes (SAP-C02 Level)
+# AWS Migration Notes
 
 DMS • SCT • Snowball • Snowmobile • MGN • VM Import/Export • Hybrid Networking • Cutover Strategies • 7 R’s
 
