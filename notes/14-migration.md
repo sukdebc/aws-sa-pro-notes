@@ -422,15 +422,15 @@ Decision clarity usually depends on:
 
 # Common Pitfalls
 
-- Assuming DMS converts schema automatically  
-- Ignoring stored procedure incompatibilities in heterogeneous migration  
-- Underestimating bandwidth limits  
-- Choosing internet transfer for very large datasets without evaluating Snow devices  
-- Forgetting DMS replication instances need correct VPC routing and security groups  
-- Using DataSync for database migration  
-- Assuming every database target is equally supported by DMS  
-- Skipping cutover rehearsal before production migration  
-- Ignoring rollback planning  
+- Assuming DMS automatically converts database schema  
+- Ignoring stored procedure and engine incompatibilities in heterogeneous migrations  
+- Underestimating available network bandwidth for large data transfers  
+- Choosing internet transfer for very large datasets without evaluating Snow Family devices  
+- Forgetting DMS replication instances require proper VPC routing, security groups, and connectivity  
+- Using DataSync for database migration instead of file-based workloads  
+- Assuming all source and target engines are equally supported by DMS  
+- Skipping migration cutover rehearsal before production switchover  
+- Ignoring rollback or fallback planning during migration
 
 ---
 

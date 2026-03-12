@@ -485,14 +485,14 @@ The cheapest runtime is not always the lowest total operating cost.
 
 # Common Pitfalls
 
-- Choosing EKS without a portability or Kubernetes requirement  
-- Selecting Fargate for workloads requiring DaemonSets or GPUs  
-- Ignoring subnet IP exhaustion  
-- Granting node-level permissions instead of task roles or IRSA  
-- Confusing ALB and NLB capabilities  
-- Treating service mesh as mandatory  
-- Ignoring EKS control plane logging and observability needs  
-- Assuming stateful workloads fit naturally into container defaults  
+- Choosing EKS without a portability or Kubernetes ecosystem requirement  
+- Selecting Fargate for workloads requiring DaemonSets, GPUs, or host-level control  
+- Ignoring subnet IP exhaustion when scaling pods or tasks  
+- Granting node-level IAM permissions instead of using task roles (ECS) or IRSA (EKS)  
+- Confusing ALB and NLB capabilities and protocol support  
+- Treating service mesh as mandatory rather than an advanced routing option  
+- Ignoring EKS control plane logging and cluster observability requirements  
+- Assuming stateful workloads fit naturally into container orchestration defaults
 
 ---
 

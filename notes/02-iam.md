@@ -13,16 +13,21 @@ https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-l
 
 Understanding evaluation order is critical for resolving complex access scenarios.
 
-### Evaluation Flow
+### Evaluation Model
 
-1. Explicit Deny in any policy → Always Deny  
-2. Service Control Policy (SCP) limits maximum permission  
-3. Permission Boundary limits identity permissions  
-4. Session Policy further restricts permissions  
-5. Identity-based Policy grants permission  
-6. Resource-based Policy grants permission (if applicable)  
+Explicit Deny in any policy → Always Deny.
 
-Final effective permission is the **intersection** of all applicable policies.
+Permissions are evaluated across multiple policy layers:
+
+- Service Control Policy (SCP) defines the maximum permissions available in the account
+- Permission Boundaries limit the permissions an IAM identity can receive
+- Session Policies can further restrict temporary role sessions
+- Identity-based policies grant permissions to users or roles
+- Resource-based policies can also grant permissions (if supported)
+
+Effective permission is the **intersection of all applicable policy types**.
+
+SCP ∩ Permission Boundary ∩ Identity Policy ∩ Session Policy ∩ Resource Policy
 
 If any layer denies → final decision is Deny.
 
@@ -87,8 +92,8 @@ Supported by:
 - EventBridge  
 
 Pattern:
-- Caller identity policy allows action  
-- Resource policy allows caller ARN  
+Access can be granted through identity policies, resource policies, or both,
+depending on the service and access pattern. Resource policies can grant access even if the caller identity policy doesn’t explicitly allow it. Example: cross-account S3 bucket access.
 
 Trust policy is not required in this case.
 
@@ -153,14 +158,6 @@ Often used by:
 https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html  
 
 Permission boundaries define the maximum permissions an identity can receive.
-
-Effective permission:
-
-SCP  
-∩ Permission Boundary  
-∩ Identity Policy  
-∩ Session Policy  
-∩ Resource Policy  
 
 Permission boundaries:
 - Do not grant permissions  
@@ -309,13 +306,15 @@ Detects:
 https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp_enable-regions.html  
 
 STS:
-- Public endpoint  
-- Requires NAT from private subnet (unless interface endpoint exists)  
-- Supports regional endpoints  
+
+- Public service endpoint
+- Private subnets require **NAT Gateway** to reach the public STS endpoint
+- Alternatively, create an **Interface VPC Endpoint (PrivateLink) for STS**
+- Supports **regional endpoints** for improved availability and reduced latency
 
 > **EXAM TIP**  
-> Private subnet + AssumeRole failure → Likely missing NAT or STS endpoint.
-
+> Private subnet + AssumeRole failure →  
+> Often missing NAT Gateway or STS Interface Endpoint.
 ---
 
 ## S3 Block Public Access Interaction
@@ -349,14 +348,12 @@ IAM Identity Center:
 
 ## Common IAM Pitfalls
 
-- Forgetting explicit Deny precedence  
-- Missing trust policy in cross-account role  
-- Ignoring KMS key policy requirements  
-- Overlooking permission boundaries  
-- Misconfiguring SCP at OU level  
-- Assuming Lambda invoke uses trust policy  
-- Forgetting STS requires internet/NAT  
-- Ignoring role chaining duration limits  
+- Forgetting that explicit Deny overrides all allow permissions  
+- Missing trust policy in cross-account role assumption  
+- Ignoring KMS key policy requirements for encryption operations  
+- Overlooking permission boundaries in delegated role creation  
+- Assuming Lambda invocation uses a trust policy (it requires a resource-based policy)  
+- Forgetting STS calls from private subnets require NAT or an STS interface endpoint  
 
 ---
 # Design Considerations

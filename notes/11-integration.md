@@ -248,15 +248,14 @@ The distinction is usually about delivery semantics rather than throughput.
 ---
 
 # Common Pitfalls
-
-- Confusing broadcast messaging with buffering  
-- Selecting EventBridge when strict ordering is required  
-- Using SQS when multiple subscribers must receive the same event independently  
-- Misconfiguring visibility timeout for Lambda processing  
+ 
+- Selecting EventBridge when strict message ordering is required  
+- Using SQS when multiple independent consumers must receive the same event  
+- Misconfiguring SQS visibility timeout relative to Lambda processing time  
 - Using Lambda as a workflow orchestrator instead of Step Functions  
-- Forgetting to configure Dead Letter Queues  
-- Overlooking EventBridge case-sensitive filtering  
-- Assuming API Gateway retries downstream failures automatically  
+- Forgetting to configure Dead Letter Queues for failure isolation  
+- Overlooking case-sensitive filtering in EventBridge rules  
+- Assuming API Gateway automatically retries downstream integration failures
 
 ---
 

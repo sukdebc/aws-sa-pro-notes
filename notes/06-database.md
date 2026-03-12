@@ -385,14 +385,14 @@ When to choose Aurora:
 
 # Common Pitfalls
 
-- Assuming Multi-AZ provides regional DR  
-- Confusing Aurora Global with read replicas  
-- Ignoring DynamoDB partition key design  
-- Expecting DAX to reduce write capacity  
-- Using Redis as primary durable store  
-- Forgetting eventual consistency in Global Tables  
-- Not enabling point-in-time recovery (PITR) for critical workloads  
-- Ignoring connection scaling limits without RDS Proxy  
+- Assuming Multi-AZ provides protection against regional failure  
+- Confusing Aurora Global Database with standard cross-region read replicas  
+- Ignoring DynamoDB partition key design leading to hot partitions  
+- Expecting DAX to reduce write capacity consumption  
+- Using Redis as a primary durable data store  
+- Forgetting eventual consistency and last-writer-wins behavior in DynamoDB Global Tables  
+- Not enabling point-in-time recovery (PITR) for critical databases  
+- Ignoring connection scaling limits in serverless or high-concurrency workloads without RDS Proxy
 
 ---
 

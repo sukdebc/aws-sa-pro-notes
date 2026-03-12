@@ -402,14 +402,14 @@ Together they help enforce consistent organizational architecture.
 
 # Common Governance Pitfalls
 
-- Assuming SCPs grant permissions  
-- Forgetting explicit Deny precedence  
-- Confusing Permission Boundaries with SCPs  
-- Expecting Tag Policies to auto-remediate  
-- Overlooking Organization Trails  
-- Assuming AssumeRole bypasses SCP  
-- Forgetting SCP does not apply to management account  
-- Misunderstanding layered permission intersection logic  
+- Assuming SCPs grant permissions (they only define the maximum allowed actions)
+- Forgetting that an explicit Deny overrides all allows
+- Confusing Permission Boundaries with SCPs
+- Expecting Tag Policies to automatically remediate non-compliant resources
+- Overlooking the need for an organization-level CloudTrail
+- Assuming AssumeRole can bypass SCP restrictions
+- Forgetting that SCPs do not apply to the management (payer) account
+- Misunderstanding the layered permission evaluation model across SCPs, IAM policies, boundaries, and session policies
 
 ---
 

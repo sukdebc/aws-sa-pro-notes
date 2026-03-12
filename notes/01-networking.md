@@ -419,14 +419,13 @@ https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelera
 # Common Pitfalls
 
 - Assuming VPC peering supports transitive routing  
-- Forgetting TGW route propagation configuration  
-- Overlooking asymmetric routing in hybrid designs  
-- Expecting PrivateLink to be transitive  
-- Attempting to attach overlapping CIDRs to TGW  
-- Assuming Direct Connect is encrypted  
-- Forgetting NAT requirement for STS in private subnets  
-- Using gateway endpoint expecting cross-account S3 support  
-- Misunderstanding Route 53 latency vs geolocation routing  
-- Forgetting PrivateLink requires NLB on provider side  
+- Forgetting to configure Transit Gateway route table propagation   
+- Expecting PrivateLink connectivity to be transitive  
+- Attempting to attach overlapping CIDR ranges to a Transit Gateway  
+- Assuming Direct Connect traffic is encrypted by default  
+- Forgetting STS calls from private subnets require NAT or an STS interface endpoint  
+- Using gateway endpoints expecting cross-account S3 access  
+- Misunderstanding Route 53 latency routing vs geolocation routing behavior  
+- Forgetting PrivateLink requires a Network Load Balancer on the provider side
 
 ---

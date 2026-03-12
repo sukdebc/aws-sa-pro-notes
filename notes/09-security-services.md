@@ -374,15 +374,15 @@ Understanding these layers clarifies how security services complement each other
 
 # Common Pitfalls
 
-- Expecting GuardDuty to block attacks  
+- Expecting GuardDuty to block or mitigate attacks (it provides threat detection only)  
 - Assuming Security Hub performs vulnerability scanning  
-- Confusing vulnerability scanning with behavioral detection  
-- Using WAF when DDoS protection is required  
-- Treating CloudTrail as a threat detection system  
-- Assuming Macie scans services beyond S3  
-- Forgetting GuardDuty and Detective integration  
-- Ignoring KMS key policy requirements  
-- Assuming Shield protects against application-layer exploits  
+- Confusing vulnerability scanning with behavioral threat detection  
+- Using AWS WAF when infrastructure-level DDoS protection is required  
+- Treating CloudTrail as a threat detection system instead of an audit log service  
+- Assuming Amazon Macie scans services beyond S3  
+- Forgetting the integration between GuardDuty, Detective, and Security Hub  
+- Ignoring KMS key policy requirements when using SSE-KMS  
+- Assuming AWS Shield protects against application-layer exploits
 
 ---
 

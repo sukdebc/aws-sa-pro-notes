@@ -415,15 +415,14 @@ Large files should not be proxied through Lambda.
 
 # Common Pitfalls
 
-- Deploying Lambda in private subnet without NAT or endpoints  
-- Ignoring shard-based scaling limits for streams  
-- Using FIFO queues unnecessarily  
-- Not implementing idempotency for duplicate events  
-- Blocking stream processing due to failed records  
-- Choosing REST API when HTTP API is sufficient  
-- Forgetting reserved concurrency protections  
-- Using Express Step Functions for durable workflows  
-
+- Deploying Lambda functions in private subnets without NAT or required VPC endpoints  
+- Ignoring shard-based scaling limits when using Kinesis or DynamoDB Streams  
+- Using FIFO queues when strict ordering or exactly-once processing is not required  
+- Not implementing idempotency for duplicate event processing  
+- Blocking stream processing due to unhandled failed records  
+- Choosing API Gateway REST APIs when HTTP APIs would be sufficient  
+- Forgetting to configure reserved concurrency to protect downstream services  
+- Using Express Step Functions for long-running or durable workflows
 ---
 
 # Design Considerations

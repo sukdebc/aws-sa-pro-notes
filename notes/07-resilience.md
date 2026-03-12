@@ -334,16 +334,15 @@ Availability level typically reflects business impact tolerance.
 
 ---
 
-# Common Design Mistakes
+# Common Pitfalls
 
 - Confusing backup with high availability  
-- Running production databases in single AZ  
-- Ignoring replication scope  
-- Storing session state locally  
-- Relying on manual failover  
-- Overlooking DNS TTL impact  
-- Not testing recovery procedures  
-
+- Running production databases in a single Availability Zone  
+- Ignoring replication scope (AZ vs Region)  
+- Storing session state locally on application servers  
+- Relying on manual failover instead of automation  
+- Overlooking DNS TTL impact during failover  
+- Not regularly testing recovery procedures
 ---
 
 # Design Considerations

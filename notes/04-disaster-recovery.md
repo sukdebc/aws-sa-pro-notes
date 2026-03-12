@@ -21,7 +21,7 @@ DR strategies exist on a spectrum — from lowest cost to lowest recovery time.
 
 ---
 
-## 1️⃣ Backup & Restore
+## Backup & Restore
 
 Characteristics:
 
@@ -49,7 +49,7 @@ Cost-efficient but slowest recovery model.
 
 ---
 
-## 2️⃣ Pilot Light
+## Pilot Light
 
 Characteristics:
 
@@ -73,7 +73,7 @@ Common components:
 
 ---
 
-## 3️⃣ Warm Standby
+## Warm Standby
 
 Characteristics:
 
@@ -93,7 +93,7 @@ Balanced cost vs recovery speed.
 
 ---
 
-## 4️⃣ Active-Active (Multi-Site)
+## Active-Active (Multi-Site)
 
 Characteristics:
 
@@ -404,33 +404,35 @@ Automation reduces RTO but increases architecture complexity.
 
 ---
 
-# Control Plane vs Data Plane Considerations
+# Control Plane vs Data Plane in Disaster Recovery
 
 Important nuance:
 
-- IAM, Route 53, CloudFront are global services  
-- VPC, Subnets, Security Groups are regional  
-- Data replication ≠ Infrastructure replication  
+- Some AWS **control plane services are global** (for example IAM, Route 53, CloudFront)
+- Most **data plane resources are regional** (for example VPC, subnets, load balancers, databases)
+- Security groups are **VPC-scoped** and therefore regional as well
+- Data replication ≠ infrastructure replication
 
-Infrastructure must be recreated in DR region.
+Replicating data alone does not recreate the application environment.
 
-Infrastructure as Code is critical for reliable DR execution.
+Networking, compute, and security configuration must exist in the recovery region for failover to succeed.
+
+Infrastructure as Code (CloudFormation, Terraform, CDK) is typically required to recreate environments consistently in DR regions.
 
 > **EXAM TIP**  
 > Replicated data alone is not DR.  
-> Infrastructure automation is required.
+> Infrastructure automation is required to rebuild the regional data plane.
 
 ---
 
 # Common Pitfalls
 
-- Assuming Multi-AZ equals regional protection  
-- Ignoring replication lag in RPO calculation  
-- Designing active-active without conflict resolution  
-- Forgetting DNS TTL impact during failover  
-- Assuming CloudFront equals DR  
-- Ignoring secrets/config replication  
-- Not planning failover automation  
+- Assuming Multi-AZ provides protection against regional failure  
+- Ignoring replication lag when calculating RPO  
+- Forgetting DNS TTL impact during Route 53 failover  
+- Assuming CloudFront distribution alone provides disaster recovery  
+- Ignoring replication of secrets, configuration, and dependencies  
+- Not planning or automating failover procedures
 
 ---
 

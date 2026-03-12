@@ -6,17 +6,6 @@ Use as quick heuristics only. Final choices should always align with workload no
 
 ---
 
-## Color scheme
-
-| Type | Color | Meaning |
-|------|--------|---------|
-| Start / Entry | Light Blue | Beginning of flow |
-| Decision | Light Orange | Branching logic |
-| Service / Action | Light Green | AWS service recommendation |
-| Neutral | Light Gray | Optional routing nodes |
-
----
-
 ## 1. Networking — Hybrid & VPC connectivity
 
 ```mermaid

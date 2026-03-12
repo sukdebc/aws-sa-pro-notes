@@ -431,15 +431,15 @@ Often used for:
 | Typical use | Feature management | Config storage |
 ---
 
-# Common Compute Themes in SAP-C02
+# Common Pitfalls
 
-- Elasticity does not imply availability  
-- Spot requires interruption tolerance  
-- Launch Templates over Launch Configurations  
-- Multi-AZ required for resilience  
-- ELB health checks critical  
-- Diversify instance types for Spot  
-- Handle AMI updates via Instance Refresh  
+- Assuming elasticity alone provides high availability  
+- Using Spot Instances for workloads that cannot tolerate interruption  
+- Continuing to use Launch Configurations instead of Launch Templates  
+- Deploying compute in a single Availability Zone  
+- Misconfiguring or ignoring load balancer health checks  
+- Not diversifying instance types or purchase options when using Spot  
+- Failing to update AMIs across Auto Scaling groups (use Instance Refresh)
 
 ---
 

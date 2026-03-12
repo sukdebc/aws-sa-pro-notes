@@ -291,11 +291,11 @@ These services often complement each other rather than replace each other.
 # Common Pitfalls
 
 - Assuming CloudFront provides static IP addresses  
-- Using CloudFront for TCP or UDP workloads  
-- Expecting Global Accelerator to cache content  
+- Using CloudFront for non-HTTP workloads (TCP/UDP)  
+- Expecting Global Accelerator to cache content like a CDN  
 - Treating Route 53 as a traffic acceleration service  
-- Confusing DNS failover with application-layer failover  
-- Assuming CDN usage alone provides multi-region disaster recovery  
+- Confusing DNS-based failover with application-layer failover  
+- Assuming CDN distribution alone provides multi-region disaster recovery
 
 ---
 

@@ -420,15 +420,13 @@ Central governance layer.
 
 # Common Pitfalls
 
-- Poor partition key distribution causing hot shards in Kinesis  
-- Assuming Firehose supports replay  
-- Using Lambda for heavy ETL workloads  
-- Ignoring Redshift workload management configuration  
-- Choosing Athena for high-concurrency BI workloads  
-- Overlooking Glue Data Catalog as central metadata layer  
-- Missing Lake Formation governance in multi-account lakes  
-- Underestimating storage growth without RA3 nodes  
-- Confusing OpenSearch with warehouse workloads  
+- Poor partition key design causing hot shards in Kinesis Data Streams  
+- Assuming Kinesis Data Firehose supports record replay  
+- Using Lambda for heavy ETL or long-running data transformations  
+- Ignoring Redshift workload management (WLM) configuration  
+- Choosing Athena for high-concurrency BI dashboards  
+- Overlooking Glue Data Catalog as the central metadata layer for data lakes  
+- Missing Lake Formation governance controls in multi-account data lakes  
 
 ---
 
